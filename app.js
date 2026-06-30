@@ -1,214 +1,233 @@
 /**
- * app.js — YouTube Homepage & Playback Application Logic
+ * app.js — ViewTube Homepage & SPA Application Logic
+ * ════════════════════════════════════════════════════════════════
+ * Includes SPA Router, Custom Video Player, Local Storage State,
+ * Likes/Subscriptions engine, dynamic Video Uploads, and Comments sorting.
  * ════════════════════════════════════════════════════════════════
  */
 
 "use strict";
 
-// Redirect to login if not authenticated
+// Protect this page — redirect to login if not authenticated
 if (typeof requireAuth === "function") requireAuth();
 
 /* ═══════════════════════════════════════════════════════════════
    1. MOCK VIDEO DATASET
    ─────────────────────────────────────────────────────────────── */
-const MOCK_VIDEOS = [
+const DEFAULT_VIDEOS = [
   {
-    id: 1,
-    title: "Big Buck Bunny — Official CGI Animated Short",
-    description: "A large and lovable rabbit deals with three bullying rodents who try to ruin his peaceful day. Produced by the Blender Foundation, this classic short is renowned for showcasing high-quality animation rendering.",
+    id: "v1",
+    title: "Misty Mountains at Dawn — 4K Cinematic Ambient",
+    description: "A breathtaking panorama of layered mountain peaks emerging from a thick morning mist. Shot at golden hour when the sky turns shades of rose and amber — perfect conditions for ambient drone photography.",
+    category: "Nature",
+    videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4",
+    thumbnailUrl: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&q=70",
+    uploader: "Sierra_Lens",
+    uploaderAvatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=sierra",
+    views: 142034,
+    uploadTime: "3 hours ago",
+    duration: "0:14",
+    likes: 4821,
+    dislikes: 12,
+    comments: [
+      { id: "c1", user: "NatureLover42", text: "Absolutely stunning! The mist is perfect.", time: "2h ago", likes: 24 },
+      { id: "c2", user: "WanderlustAlex", text: "Where is this? I need to visit!", time: "1h ago", likes: 8 }
+    ]
+  },
+  {
+    id: "v2",
+    title: "Tokyo Neon Nights Walkthrough — Street Food and Architecture",
+    description: "Wandering through the labyrinthine streets of Shinjuku after midnight, where neon signs and rain-slicked pavement create an otherworldly tableau. Urban exploration at its finest.",
+    category: "Technology",
+    videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
+    thumbnailUrl: "https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=600&q=70",
+    uploader: "UrbanFrames",
+    uploaderAvatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=urban",
+    views: 89122,
+    uploadTime: "1 day ago",
+    duration: "0:15",
+    likes: 3104,
+    dislikes: 45,
+    comments: [
+      { id: "c3", user: "CityNightOwl", text: "This captures Tokyo perfectly!", time: "20h ago", likes: 45 }
+    ]
+  },
+  {
+    id: "v3",
+    title: "Developer Desk Setup — Clean Minimalism & Productivity",
+    description: "The beauty of intentional minimalism — a clean desk setup where only the essentials remain. Featuring natural light streaming in from the left which highlights every form.",
+    category: "Technology",
+    videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4",
+    thumbnailUrl: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=600&q=70",
+    uploader: "DeskSetupKing",
+    uploaderAvatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=desk",
+    views: 212580,
+    uploadTime: "5 hours ago",
+    duration: "0:15",
+    likes: 7550,
+    dislikes: 90,
+    comments: [
+      { id: "c4", user: "DevLifestyle", text: "Clean setup goals.", time: "4h ago", likes: 112 },
+      { id: "c5", user: "CodeAndCoffee", text: "What mechanical keyboard is that?", time: "3h ago", likes: 4 }
+    ]
+  },
+  {
+    id: "v4",
+    title: "Golden Retriever Puppy Portrait — Cute Overload",
+    description: "A six-week-old golden retriever puppy playing with suspicious confidence in the afternoon sun. Shot with a 50mm prime at f/1.8 for that dreamy, bokeh-heavy background.",
     category: "Animals",
-    url: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
-    thumbnailUrl: "https://images.unsplash.com/photo-1534447677768-be436bb09401?w=800&q=80",
-    uploader: "BlenderAnimation",
-    uploaderAvatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=blender",
-    views: "4.2M",
-    uploadTime: "3 days ago",
-    duration: "9:56",
-    likes: 245821,
-    subscribers: "1.5M subscribers",
+    videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4",
+    thumbnailUrl: "https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=600&q=70",
+    uploader: "PawPrints",
+    uploaderAvatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=pawprints",
+    views: 531980,
+    uploadTime: "6 hours ago",
+    duration: "0:15",
+    likes: 18420,
+    dislikes: 54,
     comments: [
-      { user: "CartoonFan", text: "This brings back so many memories! The animation still holds up.", time: "2 hours ago" },
-      { user: "DevArtist", text: "Incredible rendering. Love the rabbit design!", time: "1 hour ago" }
+      { id: "c6", user: "DoggoFanatic", text: "My heart 😭", time: "5h ago", likes: 890 },
+      { id: "c7", user: "WoofWoof99", text: "I need one immediately.", time: "4h ago", likes: 12 }
     ]
   },
   {
-    id: 2,
-    title: "Tears of Steel — Sci-Fi Visual Effects Showcase",
-    description: "Set in a dystopian future where giant mechs patrol the ruins, a team of scientists attempts to resolve a past event that led to the apocalypse. Exploring long-exposure visual effects and green-screen composites.",
-    category: "Tech",
-    url: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4",
-    thumbnailUrl: "https://images.unsplash.com/photo-1478760329108-5c3ed9d495a0?w=800&q=80",
-    uploader: "VFXStudio",
-    uploaderAvatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=vfx",
-    views: "890K",
-    uploadTime: "1 week ago",
-    duration: "12:14",
-    likes: 75310,
-    subscribers: "450K subscribers",
-    comments: [
-      { user: "Cinephile99", text: "The CGI on the giant mech is absolutely phenomenal.", time: "4 days ago" }
-    ]
-  },
-  {
-    id: 3,
-    title: "Sintel — Cinematic Orchestral Music Video",
-    description: "Follow Sintel, a lonely girl searching for her baby dragon companion, in this sweeping fantasy adventure. Accompanied by a spectacular orchestral theme that elevates the emotional journey.",
+    id: "v5",
+    title: "Abstract Liquid Chromatic Motion Visuals",
+    description: "Macro photography of oil and water suspended in a glass, backlit to reveal an otherworldly symphony of colour. Custom chillhop soundtrack to loop forever.",
     category: "Music",
-    url: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4",
-    thumbnailUrl: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=800&q=80",
-    uploader: "EpicCinematics",
-    uploaderAvatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=epic",
-    views: "12M",
-    uploadTime: "2 months ago",
-    duration: "14:48",
-    likes: 1048201,
-    subscribers: "3.2M subscribers",
-    comments: [
-      { user: "MelodyMaker", text: "The soundtrack gave me literal chills. Fantastic masterpiece.", time: "1 month ago" },
-      { user: "DragonRider", text: "The ending always breaks my heart 😭", time: "3 weeks ago" }
-    ]
-  },
-  {
-    id: 4,
-    title: "Lo-Fi Beats for Coding, Studying & Relaxing ☕",
-    description: "Grab a warm beverage and sink into this collection of chill, low-fidelity instrumental tracks designed to help you focus on your code, writing, or studying sessions.",
-    category: "Music",
-    url: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4",
-    thumbnailUrl: "https://images.unsplash.com/photo-1518495973542-4542c06a5843?w=800&q=80",
-    uploader: "ChilledCow",
-    uploaderAvatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=chilled",
-    views: "5.2M",
-    uploadTime: "6 months ago",
-    duration: "15:02",
-    likes: 289456,
-    subscribers: "15.4M subscribers",
-    comments: [
-      { user: "CodeNinja", text: "This beat compilation saved my computer science thesis.", time: "5 days ago" }
-    ]
-  },
-  {
-    id: 5,
-    title: "How to Build a Custom Web App with Premium Glassmorphism UI",
-    description: "Learn how to use vanilla HTML, CSS variables, and modern Javascript to create responsive layouts, glassmorphic cards, custom media players, and robust states without Tailwind.",
-    category: "Tech",
-    url: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4",
-    thumbnailUrl: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=800&q=80",
-    uploader: "CodeAcademy",
-    uploaderAvatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=code",
-    views: "340K",
+    videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4",
+    thumbnailUrl: "https://images.unsplash.com/photo-1541701494587-cb58502866ab?w=600&q=70",
+    uploader: "ChromaticMacro",
+    uploaderAvatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=chroma",
+    views: 67399,
     uploadTime: "2 days ago",
-    duration: "8:45",
-    likes: 28900,
-    subscribers: "120K subscribers",
-    comments: [
-      { user: "CSSWizard", text: "Finally, a tutorial explaining raw CSS instead of utility frameworks!", time: "1 day ago" }
-    ]
-  },
-  {
-    id: 6,
-    title: "Golden Retriever Puppy's First Play Session in the Garden",
-    description: "Meet Barnaby, a golden retriever puppy discovering falling leaves, sprinkler systems, and soft green grass for the first time. Prepare yourself for pure cuteness.",
-    category: "Animals",
-    url: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4",
-    thumbnailUrl: "https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=800&q=80",
-    uploader: "PawClips",
-    uploaderAvatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=paw",
-    views: "1.4M",
-    uploadTime: "4 hours ago",
-    duration: "5:12",
-    likes: 184200,
-    subscribers: "890K subscribers",
-    comments: [
-      { user: "FluffCollector", text: "I need to adopt Barnaby immediately! Look at those paws!", time: "2 hours ago" }
-    ]
-  },
-  {
-    id: 7,
-    title: "Abstract Chromatographic Simulation - Organic Color Chemistry",
-    description: "Macro-photography demonstrating chemical reactions between colorful polymers, suspended oils, and active solvents. An incredible visual symphony of organic movement.",
-    category: "Abstract",
-    url: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4",
-    thumbnailUrl: "https://images.unsplash.com/photo-1541701494587-cb58502866ab?w=800&q=80",
-    uploader: "ArtSims",
-    uploaderAvatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=art",
-    views: "28K",
-    uploadTime: "4 days ago",
-    duration: "3:40",
-    likes: 987,
-    subscribers: "12K subscribers",
+    duration: "0:15",
+    likes: 2890,
+    dislikes: 10,
     comments: []
   },
   {
-    id: 8,
-    title: "Designing a Scandinavian Minimal House Interior Layout",
-    description: "Walkthrough of a functional, bright, and clean apartment renovation in Copenhagen. Discover design tips regarding space prioritization, natural light capture, and neutral wood textures.",
-    category: "Minimalism",
-    url: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
-    thumbnailUrl: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800&q=80",
-    uploader: "InteriorInspo",
-    uploaderAvatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=interior",
-    views: "760K",
-    uploadTime: "1 week ago",
-    duration: "18:22",
-    likes: 33450,
-    subscribers: "180K subscribers",
+    id: "v6",
+    title: "Brutalist Berlin Architecture Symmetry",
+    description: "Looking straight up through the atrium of a 1970s Brutalist building in Berlin. Hypnotic geometry that rewards patient study.",
+    category: "Nature",
+    videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4",
+    thumbnailUrl: "https://images.unsplash.com/photo-1486325212027-8081e485255e?w=600&q=70",
+    uploader: "ConcretePoet",
+    uploaderAvatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=concrete",
+    views: 44021,
+    uploadTime: "3 days ago",
+    duration: "0:52",
+    likes: 1680,
+    dislikes: 38,
     comments: [
-      { user: "StudioDesign", text: "The lighting fixtures in the dining room are absolutely stunning.", time: "5 days ago" }
+      { id: "c8", user: "ArchNerd", text: "Brutalism is so underrated.", time: "2d ago", likes: 9 }
+    ]
+  },
+  {
+    id: "v7",
+    title: "Classic Cinematic Animation — Sintel Narrative Journey",
+    description: "Experience the narrative adventure of Sintel on her journey to find her dragon companion. Masterclass in animation.",
+    category: "Gaming",
+    videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/SubaruOutbackOnStreetAndDirt.mp4",
+    thumbnailUrl: "https://images.unsplash.com/photo-1551632436-cbf8dd35adfa?w=600&q=70",
+    uploader: "EpicRenders",
+    uploaderAvatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=epic",
+    views: 128456,
+    uploadTime: "5 days ago",
+    duration: "0:10",
+    likes: 6734,
+    dislikes: 110,
+    comments: []
+  },
+  {
+    id: "v8",
+    title: "Copenhagen Minimalist Bedroom Interior Styling",
+    description: "A stripback bedroom tour in Copenhagen focusing on clean wood tones and warm light. Scandinavian lifestyle inspiration.",
+    category: "Cooking",
+    videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4",
+    thumbnailUrl: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=600&q=70",
+    uploader: "NordicNest",
+    uploaderAvatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=nordic",
+    views: 76093,
+    uploadTime: "1 week ago",
+    duration: "12:14",
+    likes: 3345,
+    dislikes: 21,
+    comments: [
+      { id: "c9", user: "MinimalMindset", text: "The wood tones are chef's kiss.", time: "5d ago", likes: 33 }
     ]
   }
 ];
 
-const MOCK_SHORTS = [
-  {
-    id: 101,
-    title: "Developer workflow hack in 5 seconds! 💻",
-    url: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4",
-    likes: "89K",
-    comments: "420",
-    channel: "DevHacks"
-  },
-  {
-    id: 102,
-    title: "Puppy vs Sprinkler! Who wins? 🐶💦",
-    url: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4",
-    likes: "420K",
-    comments: "1.2K",
-    channel: "CutePups"
-  },
-  {
-    id: 103,
-    title: "Insane VFX transition tutorial! ⚡",
-    url: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4",
-    likes: "250K",
-    comments: "810",
-    channel: "FXArtist"
-  },
-  {
-    id: 104,
-    title: "Satisfying colorful paint chromatography loop 🎨",
-    url: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
-    likes: "62K",
-    comments: "150",
-    channel: "FluidDesign"
-  }
-];
-
-const CATEGORIES = ["All", "Music", "Gaming", "Tech", "Animals", "Abstract", "Minimalism"];
+const CATEGORIES = ["All", "Nature", "Technology", "Music", "Gaming", "Animals", "Cooking"];
 
 /* ═══════════════════════════════════════════════════════════════
-   2. APPLICATION STATE
+   2. APPLICATION STATE WITH LOCAL STORAGE PERSISTENCE
    ─────────────────────────────────────────────────────────────── */
 const state = {
-  currentCategory: "All",
-  searchQuery:     "",
-  isDarkMode:      true,
-  videos:          [...MOCK_VIDEOS],
-  activeModal:     null,
-  activeVideoId:   null,
-  likedVideos:     new Set(),
+  videos: [],
+  likedVideos: new Set(),
+  dislikedVideos: new Set(),
   subscribedChannels: new Set(),
-  currentView:     "home", // "home" | "shorts" | "liked" | "library" | "subscriptions"
+  watchHistory: [],
+  watchLater: new Set(),
+  currentCategory: "All",
+  searchQuery: "",
+  isDarkMode: true,
+  activeView: "feed", // "feed" | "watch" | "channel" | "subscriptions" | "liked" | "library"
+  activeVideoId: null,
+  activeChannelName: null,
+  commentsSortOrder: "top", // "top" | "newest"
 };
+
+/** Load state from localStorage on init */
+function loadState() {
+  try {
+    const rawVideos = localStorage.getItem("viewtube_videos");
+    state.videos = rawVideos ? JSON.parse(rawVideos) : [...DEFAULT_VIDEOS];
+
+    const rawLikes = localStorage.getItem("viewtube_liked");
+    state.likedVideos = rawLikes ? new Set(JSON.parse(rawLikes)) : new Set();
+
+    const rawDislikes = localStorage.getItem("viewtube_disliked");
+    state.dislikedVideos = rawDislikes ? new Set(JSON.parse(rawDislikes)) : new Set();
+
+    const rawSubs = localStorage.getItem("viewtube_subs");
+    state.subscribedChannels = rawSubs ? new Set(JSON.parse(rawSubs)) : new Set(["Sierra_Lens"]);
+
+    const rawHistory = localStorage.getItem("viewtube_history");
+    state.watchHistory = rawHistory ? JSON.parse(rawHistory) : [];
+
+    const rawLater = localStorage.getItem("viewtube_later");
+    state.watchLater = rawLater ? new Set(JSON.parse(rawLater)) : new Set();
+
+    const savedTheme = localStorage.getItem("viewtube_theme");
+    state.isDarkMode = savedTheme !== "light";
+  } catch (e) {
+    console.error("Error loading localStorage state:", e);
+    state.videos = [...DEFAULT_VIDEOS];
+    state.likedVideos = new Set();
+    state.dislikedVideos = new Set();
+    state.subscribedChannels = new Set(["Sierra_Lens"]);
+    state.watchHistory = [];
+    state.watchLater = new Set();
+  }
+}
+
+/** Save state to localStorage */
+function saveState() {
+  try {
+    localStorage.setItem("viewtube_videos", JSON.stringify(state.videos));
+    localStorage.setItem("viewtube_liked", JSON.stringify([...state.likedVideos]));
+    localStorage.setItem("viewtube_disliked", JSON.stringify([...state.dislikedVideos]));
+    localStorage.setItem("viewtube_subs", JSON.stringify([...state.subscribedChannels]));
+    localStorage.setItem("viewtube_history", JSON.stringify(state.watchHistory));
+    localStorage.setItem("viewtube_later", JSON.stringify([...state.watchLater]));
+  } catch (e) {
+    console.error("Error saving state to localStorage:", e);
+  }
+}
 
 /* ═══════════════════════════════════════════════════════════════
    3. TOAST NOTIFICATION SYSTEM
@@ -220,7 +239,7 @@ const TOAST_ICONS = {
   warning: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`
 };
 
-function showToast(message, type = "info", duration = 3500) {
+function showToast(message, type = "info", duration = 3000) {
   const container = document.getElementById("toast-container");
   if (!container) return;
 
@@ -263,12 +282,6 @@ function showToast(message, type = "info", duration = 3500) {
    4. THEME MANAGER
    ─────────────────────────────────────────────────────────────── */
 function initTheme() {
-  const saved = localStorage.getItem("youtube_theme");
-  state.isDarkMode = saved !== "light";
-  applyTheme();
-}
-
-function applyTheme() {
   document.documentElement.classList.toggle("light-mode", !state.isDarkMode);
   const track = document.getElementById("theme-track");
   if (track) track.classList.toggle("active", !state.isDarkMode);
@@ -276,13 +289,13 @@ function applyTheme() {
 
 function toggleTheme() {
   state.isDarkMode = !state.isDarkMode;
-  localStorage.setItem("youtube_theme", state.isDarkMode ? "dark" : "light");
-  applyTheme();
+  localStorage.setItem("viewtube_theme", state.isDarkMode ? "dark" : "light");
+  initTheme();
   showToast(`${state.isDarkMode ? "Dark" : "Light"} mode enabled`, "info", 2000);
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   5. SIDEBAR MANAGER (mobile + view controllers)
+   5. SIDEBAR drawer
    ─────────────────────────────────────────────────────────────── */
 function openSidebar() {
   document.getElementById("sidebar").classList.add("open");
@@ -296,69 +309,85 @@ function closeSidebar() {
   document.body.style.overflow = "";
 }
 
-function selectView(viewName) {
-  state.currentView = viewName;
-  closeSidebar();
-
-  // Reset active menu items visually
-  document.querySelectorAll(".sidebar-item").forEach(item => {
-    item.classList.remove("active");
-  });
-
-  const selectedBtn = document.getElementById(`sidebar-${viewName}`);
-  if (selectedBtn) selectedBtn.classList.add("active");
-
-  const sectionTitle = document.getElementById("section-title");
-  const categoryBar = document.getElementById("category-bar");
-
-  if (viewName === "home") {
-    if (sectionTitle) sectionTitle.textContent = "Discover Videos";
-    if (categoryBar) categoryBar.style.display = "flex";
-    renderVideoGrid();
-  } else if (viewName === "shorts") {
-    if (sectionTitle) sectionTitle.textContent = "YouTube Shorts";
-    if (categoryBar) categoryBar.style.display = "none";
-    renderShortsView();
-  } else if (viewName === "liked") {
-    if (sectionTitle) sectionTitle.textContent = "Liked Videos";
-    if (categoryBar) categoryBar.style.display = "none";
-    renderVideoGrid(true); // render only liked
-  } else if (viewName === "subscriptions") {
-    if (sectionTitle) sectionTitle.textContent = "Subscriptions Feed";
-    if (categoryBar) categoryBar.style.display = "none";
-    renderVideoGrid(false, true); // render only subscribed channel videos
-  } else if (viewName === "library") {
-    if (sectionTitle) sectionTitle.textContent = "Your Library";
-    if (categoryBar) categoryBar.style.display = "none";
-    renderLibraryView();
-  }
-}
-
 /* ═══════════════════════════════════════════════════════════════
-   6. AVATAR DROPDOWN
+   6. SPA ROUTING ENGINE
    ─────────────────────────────────────────────────────────────── */
-function toggleAvatarDropdown() {
-  const dropdown = document.getElementById("avatar-dropdown");
-  const isOpen = dropdown.classList.toggle("open");
-  document.getElementById("avatar-btn").setAttribute("aria-expanded", isOpen);
-}
-
-function closeAvatarDropdown() {
-  const dropdown = document.getElementById("avatar-dropdown");
-  if (dropdown) dropdown.classList.remove("open");
-  const btn = document.getElementById("avatar-btn");
-  if (btn) btn.setAttribute("aria-expanded", "false");
-}
-
-function handleDocumentClick(e) {
-  const avatarWrapper = document.querySelector(".avatar-wrapper");
-  if (avatarWrapper && !avatarWrapper.contains(e.target)) {
-    closeAvatarDropdown();
+function parseHash() {
+  const hash = window.location.hash || "#feed";
+  const [route, queryStr] = hash.split("?");
+  const params = {};
+  if (queryStr) {
+    queryStr.split("&").forEach(part => {
+      const [k, v] = part.split("=");
+      params[decodeURIComponent(k)] = decodeURIComponent(v);
+    });
   }
+  return { route, params };
+}
+
+function navigateToRoute() {
+  const { route, params } = parseHash();
+  
+  // Pause main video if transitioning away from watch view
+  const mainVideo = document.getElementById("main-video");
+  if (mainVideo) {
+    mainVideo.pause();
+  }
+
+  // Hide all view panels
+  document.querySelectorAll(".app-view").forEach(el => el.style.display = "none");
+  
+  // Reset active menu indicator
+  document.querySelectorAll(".sidebar-item").forEach(item => item.classList.remove("active"));
+
+  if (route === "#watch" && params.v) {
+    state.activeView = "watch";
+    state.activeVideoId = params.v;
+    renderWatchPage(params.v);
+    document.getElementById("watch-view").style.display = "block";
+  } else if (route === "#channel" && params.c) {
+    state.activeView = "channel";
+    state.activeChannelName = params.c;
+    renderChannelPage(params.c);
+    document.getElementById("channel-view").style.display = "block";
+    highlightSidebarLink("#channel");
+  } else if (route === "#subscriptions") {
+    state.activeView = "subscriptions";
+    renderSubscriptionsPage();
+    document.getElementById("subscriptions-view").style.display = "block";
+    highlightSidebarLink("#subscriptions");
+  } else if (route === "#liked") {
+    state.activeView = "liked";
+    renderLikedPage();
+    document.getElementById("liked-view").style.display = "block";
+    highlightSidebarLink("#liked");
+  } else if (route === "#library") {
+    state.activeView = "library";
+    renderLibraryPage();
+    document.getElementById("library-view").style.display = "block";
+    highlightSidebarLink("#library");
+  } else {
+    // Default to feed
+    state.activeView = "feed";
+    document.getElementById("home-view").style.display = "block";
+    highlightSidebarLink("#feed");
+    renderImageGrid();
+  }
+
+  // Auto-close sidebar on mobile after navigations
+  if (window.innerWidth <= 640) closeSidebar();
+}
+
+function highlightSidebarLink(href) {
+  document.querySelectorAll(".sidebar-item").forEach(item => {
+    if (item.getAttribute("href") === href) {
+      item.classList.add("active");
+    }
+  });
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   7. CATEGORIES & SEARCH CHIPS
+   7. RENDER HOMEPAGE GRID & CATEGORY CHIPS
    ─────────────────────────────────────────────────────────────── */
 function renderCategoryChips() {
   const bar = document.getElementById("category-bar");
@@ -371,132 +400,758 @@ function renderCategoryChips() {
       aria-pressed="${cat === state.currentCategory}"
     >${cat}</button>
   `).join("");
-
-  bar.addEventListener("click", (e) => {
-    const chip = e.target.closest(".chip");
-    if (!chip) return;
-    const category = chip.dataset.category;
-    state.currentCategory = category;
-    bar.querySelectorAll(".chip").forEach(c => {
-      c.classList.toggle("active", c.dataset.category === category);
-      c.setAttribute("aria-pressed", c.dataset.category === category);
-    });
-    if (state.currentView !== "home") selectView("home");
-    renderVideoGrid();
-  });
 }
 
-function getFilteredVideos(onlyLiked = false, onlySubscribed = false) {
-  let filtered = state.videos;
-
-  if (onlyLiked) {
-    filtered = filtered.filter(vid => state.likedVideos.has(vid.id));
-  }
-
-  if (onlySubscribed) {
-    filtered = filtered.filter(vid => state.subscribedChannels.has(vid.uploader));
-  }
-
-  if (state.currentView === "home" && state.currentCategory !== "All") {
-    filtered = filtered.filter(vid => vid.category === state.currentCategory);
-  }
-
-  if (state.searchQuery) {
-    const q = state.searchQuery.toLowerCase();
-    filtered = filtered.filter(vid =>
-      vid.title.toLowerCase().includes(q) ||
-      vid.description.toLowerCase().includes(q) ||
-      vid.uploader.toLowerCase().includes(q) ||
-      vid.category.toLowerCase().includes(q)
-    );
-  }
-
-  return filtered;
-}
-
-function initSearch() {
-  const searchInput = document.getElementById("search-input");
-  if (!searchInput) return;
-
-  searchInput.addEventListener("input", (e) => {
-    state.searchQuery = e.target.value.trim();
-    if (state.currentView !== "home" && state.currentView !== "liked" && state.currentView !== "subscriptions") {
-      selectView("home");
-    }
-    if (state.currentView === "home") renderVideoGrid();
-    else if (state.currentView === "liked") renderVideoGrid(true);
-    else if (state.currentView === "subscriptions") renderVideoGrid(false, true);
-  });
-
-  searchInput.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") e.preventDefault();
-  });
-}
-
-/* ═══════════════════════════════════════════════════════════════
-   8. VIDEO GRID RENDERER
-   ─────────────────────────────────────────────────────────────── */
 function formatNumber(n) {
   if (n >= 1000000) return (n / 1000000).toFixed(1).replace(".0", "") + "M";
   if (n >= 1000)     return (n / 1000).toFixed(1).replace(".0", "") + "K";
   return String(n);
 }
 
-function renderVideoGrid(onlyLiked = false, onlySubscribed = false) {
-  const grid = document.getElementById("image-grid");
+function renderImageGrid() {
+  const grid = document.getElementById("video-grid");
   if (!grid) return;
 
-  const filtered = getFilteredVideos(onlyLiked, onlySubscribed);
+  let filtered = state.videos;
+
+  if (state.currentCategory !== "All") {
+    filtered = filtered.filter(v => v.category === state.currentCategory);
+  }
+
+  if (state.searchQuery) {
+    const q = state.searchQuery.toLowerCase();
+    filtered = filtered.filter(v =>
+      v.title.toLowerCase().includes(q) ||
+      v.description.toLowerCase().includes(q) ||
+      v.uploader.toLowerCase().includes(q) ||
+      v.category.toLowerCase().includes(q)
+    );
+  }
 
   if (filtered.length === 0) {
     grid.innerHTML = `
       <div class="empty-state">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="56" height="56">
-          <rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"/>
-          <line x1="12" y1="2" x2="12" y2="22"/>
-          <line x1="2" y1="12" x2="22" y2="12"/>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/><line x1="8" y1="12" x2="16" y2="12"/>
         </svg>
         <h3>No videos found</h3>
-        <p>Try refining your search keywords or checking other feeds.</p>
+        <p>Try searching for something else or choosing a different category chip.</p>
       </div>
     `;
     return;
   }
 
-  grid.innerHTML = filtered.map((vid, index) => `
+  grid.innerHTML = filtered.map((v, index) => `
     <article
       class="image-card"
-      data-id="${vid.id}"
+      data-id="${v.id}"
       tabindex="0"
-      role="button"
-      aria-label="Play video: ${vid.title}"
-      style="animation-delay: ${index * 50}ms"
+      role="link"
+      style="animation-delay: ${index * 40}ms"
     >
       <div class="card-thumbnail">
-        <img src="${vid.thumbnailUrl}" alt="${vid.title}" loading="lazy" />
-        <span class="video-duration-badge">${vid.duration}</span>
+        <img src="${v.thumbnailUrl}" alt="${v.title}" loading="lazy" />
+        <span class="duration-badge">${v.duration}</span>
         <div class="card-overlay" aria-hidden="true">
-          <span class="overlay-category">${vid.category}</span>
-          <div class="play-hover-circle">
-            <svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
-              <path d="M8 5v14l11-7z"/>
-            </svg>
-          </div>
+          <span class="overlay-category">${v.category}</span>
         </div>
       </div>
 
       <div class="card-body">
+        <a href="#channel?c=${encodeURIComponent(v.uploader)}" class="card-avatar-link">
+          <div class="card-avatar">
+            <img src="${v.uploaderAvatar}" alt="${v.uploader}" loading="lazy" />
+          </div>
+        </a>
+        <div class="card-info">
+          <a href="#watch?v=${v.id}"><p class="card-title">${escapeHtml(v.title)}</p></a>
+          <div class="card-meta">
+            <a href="#channel?c=${encodeURIComponent(v.uploader)}" class="card-uploader">
+              ${escapeHtml(v.uploader)}
+              <span class="verified-badge" title="Verified Creator">
+                <svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+              </span>
+            </a>
+            <div class="card-stats">
+              <span>${formatNumber(v.views)} views</span>
+              <span class="dot">•</span>
+              <span>${v.uploadTime}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </article>
+  `).join("");
+
+  // Attach card clicks
+  grid.querySelectorAll(".image-card").forEach(card => {
+    const vidId = card.dataset.id;
+    card.addEventListener("click", (e) => {
+      // Don't navigate to watch if avatar link is clicked
+      if (e.target.closest(".card-avatar-link") || e.target.closest(".card-uploader")) return;
+      window.location.hash = `#watch?v=${vidId}`;
+    });
+    card.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        window.location.hash = `#watch?v=${vidId}`;
+      }
+    });
+  });
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   8. WATCH VIEW & CUSTOM VIDEO PLAYER LOGIC
+   ─────────────────────────────────────────────────────────────── */
+let playerControlsBound = false;
+
+function renderWatchPage(videoId) {
+  const v = state.videos.find(item => item.id === videoId);
+  if (!v) {
+    showToast("Video not found!", "error");
+    window.location.hash = "#feed";
+    return;
+  }
+
+  // Increment views
+  v.views += 1;
+  saveState();
+
+  // Add to history
+  state.watchHistory = state.watchHistory.filter(id => id !== videoId);
+  state.watchHistory.unshift(videoId);
+  saveState();
+
+  // Hydrate text info
+  document.getElementById("video-title").textContent = v.title;
+  document.getElementById("video-views-count").textContent = `${v.views.toLocaleString()} views`;
+  document.getElementById("video-upload-date").textContent = v.uploadTime;
+  document.getElementById("video-category-tag").textContent = v.category;
+  document.getElementById("video-description-text").textContent = v.description;
+
+  // Hydrate creator details
+  document.getElementById("video-channel-name").textContent = v.uploader;
+  document.getElementById("video-channel-avatar").src = v.uploaderAvatar;
+  document.getElementById("video-channel-link").setAttribute("href", `#channel?c=${encodeURIComponent(v.uploader)}`);
+
+  // Channel subscriber updates
+  updateSubscriberUI(v.uploader);
+
+  // Sync likes count
+  document.getElementById("video-likes").textContent = formatNumber(v.likes);
+  document.getElementById("video-like-btn").classList.toggle("liked", state.likedVideos.has(v.id));
+
+  // Sync watch later button
+  document.getElementById("video-watch-later-btn").classList.toggle("liked", state.watchLater.has(v.id));
+
+  // Set video source
+  const videoEl = document.getElementById("main-video");
+  videoEl.src = v.videoUrl;
+  videoEl.load();
+
+  // Dynamic ambient glow
+  const glow = document.getElementById("ambient-glow");
+  if (glow) {
+    glow.style.backgroundImage = `url('${v.thumbnailUrl}')`;
+  }
+
+  // Render sidebar recommendations
+  renderSidebarRecommendations(v.id);
+
+  // Render comments list
+  renderWatchComments(v.comments);
+
+  // Wire up player controls if not done yet
+  initVideoPlayerControls();
+}
+
+function updateSubscriberUI(uploader) {
+  const subBtn = document.getElementById("subscribe-btn");
+  const isSubbed = state.subscribedChannels.has(uploader);
+  subBtn.classList.toggle("subscribed", isSubbed);
+  subBtn.textContent = isSubbed ? "Subscribed" : "Subscribe";
+
+  // Simulate total channel subscribers
+  let baseSubs = 120500; // default baseline
+  if (uploader === "Sierra_Lens") baseSubs = 142000;
+  if (uploader === "UrbanFrames") baseSubs = 89000;
+  if (uploader === "DeskSetupKing") baseSubs = 212000;
+  if (uploader === "PawPrints") baseSubs = 531000;
+
+  const totalSubs = isSubbed ? baseSubs + 1 : baseSubs;
+  document.getElementById("video-sub-count").textContent = `${totalSubs.toLocaleString()} subscribers`;
+}
+
+function renderSidebarRecommendations(activeId) {
+  const list = document.getElementById("recommended-videos");
+  if (!list) return;
+
+  const filtered = state.videos.filter(v => v.id !== activeId);
+
+  list.innerHTML = filtered.map(v => `
+    <div class="side-video-card" data-id="${v.id}">
+      <div class="side-thumbnail">
+        <img src="${v.thumbnailUrl}" alt="${v.title}" loading="lazy" />
+        <span class="duration-badge">${v.duration}</span>
+      </div>
+      <div class="side-info">
+        <h4 class="side-title">${escapeHtml(v.title)}</h4>
+        <div class="side-meta">
+          <span>${escapeHtml(v.uploader)}</span>
+          <span>${formatNumber(v.views)} views • ${v.uploadTime}</span>
+        </div>
+      </div>
+    </div>
+  `).join("");
+
+  list.querySelectorAll(".side-video-card").forEach(card => {
+    card.addEventListener("click", () => {
+      window.location.hash = `#watch?v=${card.dataset.id}`;
+    });
+  });
+}
+
+/** Controls Logic for Custom Video Player */
+function initVideoPlayerControls() {
+  if (playerControlsBound) return;
+  playerControlsBound = true;
+
+  const video = document.getElementById("main-video");
+  const container = document.getElementById("video-player-container");
+  const playBtn = document.getElementById("player-play-btn");
+  const muteBtn = document.getElementById("player-mute-btn");
+  const volumeSlider = document.getElementById("volume-slider");
+  const currentTimeEl = document.getElementById("current-time");
+  const durationTimeEl = document.getElementById("duration-time");
+  const progressBar = document.getElementById("progress-current");
+  const progressBuffered = document.getElementById("progress-buffered");
+  const progressScrubber = document.getElementById("progress-scrubber");
+  const progressContainer = document.getElementById("progress-container");
+  const speedBtn = document.getElementById("player-speed-btn");
+  const speedDropdown = document.getElementById("speed-dropdown");
+  const theaterBtn = document.getElementById("theater-btn");
+  const fullscreenBtn = document.getElementById("fullscreen-btn");
+  const clickOverlay = document.getElementById("video-click-overlay");
+
+  // Play / Pause toggler
+  function togglePlay() {
+    if (video.paused) {
+      video.play();
+      showCenterIcon("<svg viewBox='0 0 24 24' width='38' height='38'><path fill='currentColor' d='M8 5v14l11-7z'/></svg>");
+    } else {
+      video.pause();
+      showCenterIcon("<svg viewBox='0 0 24 24' width='38' height='38'><path fill='currentColor' d='M6 19h4V5H6v14zm8-14v14h4V5h-4z'/></svg>");
+    }
+  }
+
+  function showCenterIcon(iconHtml) {
+    const centerIcon = document.getElementById("video-center-icon");
+    centerIcon.innerHTML = iconHtml;
+    clickOverlay.style.opacity = "1";
+    setTimeout(() => {
+      clickOverlay.style.opacity = "";
+    }, 400);
+  }
+
+  playBtn.addEventListener("click", togglePlay);
+  clickOverlay.addEventListener("click", togglePlay);
+
+  video.addEventListener("play", () => {
+    playBtn.querySelector(".play-icon").style.display = "none";
+    playBtn.querySelector(".pause-icon").style.display = "block";
+  });
+
+  video.addEventListener("pause", () => {
+    playBtn.querySelector(".play-icon").style.display = "block";
+    playBtn.querySelector(".pause-icon").style.display = "none";
+  });
+
+  // Time Updates
+  video.addEventListener("timeupdate", () => {
+    const current = video.currentTime;
+    const dur = video.duration || 0;
+    
+    // Elapsed duration formatting
+    currentTimeEl.textContent = formatTime(current);
+    if (!isNaN(dur)) {
+      durationTimeEl.textContent = formatTime(dur);
+      const pct = (current / dur) * 100;
+      progressBar.style.width = `${pct}%`;
+      progressScrubber.style.left = `${pct}%`;
+    }
+  });
+
+  // Buffer details progress
+  video.addEventListener("progress", () => {
+    const dur = video.duration || 0;
+    if (dur > 0 && video.buffered.length > 0) {
+      const end = video.buffered.end(video.buffered.length - 1);
+      const pct = (end / dur) * 100;
+      progressBuffered.style.width = `${pct}%`;
+    }
+  });
+
+  // Drag scrubber seek bar
+  let isSeeking = false;
+  
+  function seekToPosition(e) {
+    const dur = video.duration;
+    if (!dur) return;
+    const rect = progressContainer.getBoundingClientRect();
+    const pos = (e.clientX - rect.left) / rect.width;
+    const clampPos = Math.max(0, Math.min(1, pos));
+    video.currentTime = clampPos * dur;
+  }
+
+  progressContainer.addEventListener("mousedown", (e) => {
+    isSeeking = true;
+    seekToPosition(e);
+  });
+
+  document.addEventListener("mousemove", (e) => {
+    if (isSeeking) seekToPosition(e);
+  });
+
+  document.addEventListener("mouseup", () => {
+    isSeeking = false;
+  });
+
+  // Volume slider control
+  volumeSlider.addEventListener("input", (e) => {
+    const val = Number(e.target.value);
+    video.volume = val;
+    video.muted = val === 0;
+    updateVolumeIcon(val, video.muted);
+  });
+
+  muteBtn.addEventListener("click", () => {
+    video.muted = !video.muted;
+    updateVolumeIcon(video.volume, video.muted);
+  });
+
+  function updateVolumeIcon(vol, isMuted) {
+    if (isMuted || vol === 0) {
+      muteBtn.querySelector(".volume-high-icon").style.display = "none";
+      muteBtn.querySelector(".volume-mute-icon").style.display = "block";
+    } else {
+      muteBtn.querySelector(".volume-high-icon").style.display = "block";
+      muteBtn.querySelector(".volume-mute-icon").style.display = "none";
+    }
+  }
+
+  // Playback rates
+  speedDropdown.querySelectorAll("button").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const rate = Number(btn.dataset.speed);
+      video.playbackRate = rate;
+      speedBtn.textContent = rate === 1 ? "Normal" : `${rate}x`;
+      speedDropdown.querySelectorAll("button").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+    });
+  });
+
+  // Theater Mode toggling
+  theaterBtn.addEventListener("click", () => {
+    container.classList.toggle("theater");
+  });
+
+  // Fullscreen trigger
+  fullscreenBtn.addEventListener("click", () => {
+    if (!document.fullscreenElement) {
+      container.requestFullscreen().catch(err => {
+        showToast("Error enabling fullscreen", "error");
+      });
+    } else {
+      document.exitFullscreen();
+    }
+  });
+
+  document.addEventListener("fullscreenchange", () => {
+    const isFull = !!document.fullscreenElement;
+    fullscreenBtn.querySelector(".fullscreen-enter-icon").style.display = isFull ? "none" : "block";
+    fullscreenBtn.querySelector(".fullscreen-exit-icon").style.display = isFull ? "block" : "none";
+  });
+
+  // Keyboard shortcut listener (Space for pause, L to seek forward, J to seek backward)
+  document.addEventListener("keydown", (e) => {
+    if (state.activeView !== "watch") return;
+    
+    // Ignore keys in active input fields
+    if (document.activeElement.tagName === "INPUT" || document.activeElement.tagName === "TEXTAREA") {
+      return;
+    }
+
+    if (e.key === " " || e.key === "k") {
+      e.preventDefault();
+      togglePlay();
+    } else if (e.key === "f") {
+      e.preventDefault();
+      fullscreenBtn.click();
+    } else if (e.key === "t") {
+      e.preventDefault();
+      theaterBtn.click();
+    } else if (e.key === "m") {
+      e.preventDefault();
+      muteBtn.click();
+    } else if (e.key === "ArrowLeft") {
+      e.preventDefault();
+      video.currentTime = Math.max(0, video.currentTime - 5);
+      showToast("Seek backward 5s", "info", 1000);
+    } else if (e.key === "ArrowRight") {
+      e.preventDefault();
+      video.currentTime = Math.min(video.duration || 0, video.currentTime + 5);
+      showToast("Seek forward 5s", "info", 1000);
+    }
+  });
+}
+
+function formatTime(secs) {
+  const m = Math.floor(secs / 60);
+  const s = Math.floor(secs % 60);
+  return `${m}:${s < 10 ? "0" : ""}${s}`;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   9. WATCH INTERACTIONS: LIKES, DESCRIPTION BOX, COMMENTS
+   ─────────────────────────────────────────────────────────────── */
+function initWatchInteractions() {
+  // Video Like Button click
+  document.getElementById("video-like-btn").addEventListener("click", () => {
+    const vidId = state.activeVideoId;
+    if (!vidId) return;
+
+    const v = state.videos.find(item => item.id === vidId);
+    if (!v) return;
+
+    const likeBtn = document.getElementById("video-like-btn");
+    const isLiked = state.likedVideos.has(vidId);
+
+    if (isLiked) {
+      state.likedVideos.delete(vidId);
+      v.likes -= 1;
+      likeBtn.classList.remove("liked");
+      showToast("Removed like", "info", 1500);
+    } else {
+      state.likedVideos.add(vidId);
+      v.likes += 1;
+      likeBtn.classList.add("liked");
+      showToast("Video Liked! 👍", "success", 1500);
+    }
+
+    document.getElementById("video-likes").textContent = formatNumber(v.likes);
+    saveState();
+  });
+
+  // Video Dislike Button
+  document.getElementById("video-dislike-btn").addEventListener("click", () => {
+    const vidId = state.activeVideoId;
+    const dislikeBtn = document.getElementById("video-dislike-btn");
+    
+    if (state.dislikedVideos.has(vidId)) {
+      state.dislikedVideos.delete(vidId);
+      dislikeBtn.classList.remove("liked");
+    } else {
+      state.dislikedVideos.add(vidId);
+      dislikeBtn.classList.add("liked");
+      // Remove like if it was liked
+      if (state.likedVideos.has(vidId)) {
+        document.getElementById("video-like-btn").click();
+      }
+      showToast("Video Disliked!", "info", 1500);
+    }
+    saveState();
+  });
+
+  // Watch Later button
+  document.getElementById("video-watch-later-btn").addEventListener("click", () => {
+    const vidId = state.activeVideoId;
+    if (!vidId) return;
+
+    const btn = document.getElementById("video-watch-later-btn");
+    if (state.watchLater.has(vidId)) {
+      state.watchLater.delete(vidId);
+      btn.classList.remove("liked");
+      showToast("Removed from Watch Later queue", "info", 1500);
+    } else {
+      state.watchLater.add(vidId);
+      btn.classList.add("liked");
+      showToast("Added to Watch Later queue! 🕒", "success", 1500);
+    }
+    saveState();
+  });
+
+  // Share button copy
+  document.getElementById("video-share-btn").addEventListener("click", () => {
+    const mockUrl = `${window.location.origin}${window.location.pathname}#watch?v=${state.activeVideoId}`;
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(mockUrl).then(() => {
+        showToast("Video URL copied to clipboard!", "success");
+      });
+    } else {
+      window.prompt("Copy link:", mockUrl);
+    }
+  });
+
+  // Subscribe Watch button click
+  document.getElementById("subscribe-btn").addEventListener("click", () => {
+    const v = state.videos.find(item => item.id === state.activeVideoId);
+    if (!v) return;
+
+    const isSubbed = state.subscribedChannels.has(v.uploader);
+    if (isSubbed) {
+      state.subscribedChannels.delete(v.uploader);
+      showToast(`Unsubscribed from ${v.uploader}`, "info");
+    } else {
+      state.subscribedChannels.add(v.uploader);
+      showToast(`Subscribed to ${v.uploader}! 🔔`, "success");
+    }
+    updateSubscriberUI(v.uploader);
+    saveState();
+  });
+
+  // Collapsible description toggle
+  const descBox = document.getElementById("description-box");
+  const descToggle = document.getElementById("description-toggle");
+  
+  descBox.addEventListener("click", () => {
+    descBox.classList.toggle("expanded");
+    descToggle.textContent = descBox.classList.contains("expanded") ? "Show less" : "Show more";
+  });
+
+  // Comment buttons display toggle
+  const textInput = document.getElementById("comment-input-textarea");
+  const buttonsPanel = document.getElementById("comment-buttons");
+  const cancelComment = document.getElementById("comment-cancel");
+  const postComment = document.getElementById("comment-submit-btn");
+
+  textInput.addEventListener("focus", () => {
+    buttonsPanel.style.display = "flex";
+  });
+
+  textInput.addEventListener("input", (e) => {
+    const hasText = e.target.value.trim().length > 0;
+    postComment.disabled = !hasText;
+    postComment.classList.toggle("ready", hasText);
+  });
+
+  cancelComment.addEventListener("click", () => {
+    textInput.value = "";
+    buttonsPanel.style.display = "none";
+    postComment.disabled = true;
+    postComment.classList.remove("ready");
+  });
+
+  postComment.addEventListener("click", () => {
+    const val = textInput.value.trim();
+    if (!val) return;
+
+    const vid = state.videos.find(item => item.id === state.activeVideoId);
+    if (!vid) return;
+
+    let user = { username: "Guest" };
+    try {
+      user = JSON.parse(sessionStorage.getItem("pictube_user") || '{"username":"Guest"}');
+    } catch (_) {}
+
+    const newComment = {
+      id: "c" + Date.now(),
+      user: user.username || "You",
+      text: val,
+      time: "Just now",
+      likes: 0
+    };
+
+    vid.comments.unshift(newComment);
+    saveState();
+
+    textInput.value = "";
+    postComment.disabled = true;
+    postComment.classList.remove("ready");
+    buttonsPanel.style.display = "none";
+
+    renderWatchComments(vid.comments);
+    showToast("Comment published!", "success");
+  });
+
+  // Sort dropdown
+  const sortBtn = document.getElementById("sort-btn");
+  const sortDropdown = document.getElementById("sort-dropdown");
+  
+  sortBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    sortDropdown.classList.toggle("open");
+  });
+
+  document.addEventListener("click", () => {
+    sortDropdown.classList.remove("open");
+  });
+
+  sortDropdown.querySelectorAll("button").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const mode = btn.dataset.sort;
+      state.commentsSortOrder = mode;
+      sortDropdown.querySelectorAll("button").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+
+      const vid = state.videos.find(item => item.id === state.activeVideoId);
+      if (vid) renderWatchComments(vid.comments);
+    });
+  });
+}
+
+function renderWatchComments(comments) {
+  const list = document.getElementById("watch-comments-list");
+  if (!list) return;
+
+  document.getElementById("comments-count").textContent = `${comments.length} comments`;
+
+  if (comments.length === 0) {
+    list.innerHTML = `<p class="text-sm text-muted" style="padding: 1rem 0;">No comments yet. Be the first to start the conversation!</p>`;
+    return;
+  }
+
+  // Sort logic
+  const sorted = [...comments];
+  if (state.commentsSortOrder === "top") {
+    sorted.sort((a, b) => b.likes - a.likes);
+  }
+
+  list.innerHTML = sorted.map(c => `
+    <div class="comment-item">
+      <div class="comment-avatar">
+        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(c.user)}" alt="${c.user}" loading="lazy" />
+      </div>
+      <div class="comment-bubble">
+        <div style="display: flex; gap: 0.5rem; align-items: center;">
+          <p class="comment-username">${escapeHtml(c.user)}</p>
+          <span style="font-size: 0.72rem; color: var(--text-muted);">${c.time}</span>
+        </div>
+        <p class="comment-text">${escapeHtml(c.text)}</p>
+        <div style="display: flex; align-items: center; gap: 0.4rem; margin-top: 0.35rem; color: var(--text-secondary); font-size: 0.75rem;">
+          <button class="comment-like-btn" data-id="${c.id}" style="display: flex; align-items: center; gap: 0.15rem;">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M1 21h4V9H1v12zm22-11c0-1.1-.9-2-2-2h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L14.17 1 7.59 7.59C7.22 7.95 7 8.45 7 9v10c0 1.1.9 2 2 2h9c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-2z"/></svg>
+            <span>${c.likes}</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  `).join("");
+
+  list.querySelectorAll(".comment-like-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const commId = btn.dataset.id;
+      const c = comments.find(item => item.id === commId);
+      if (c) {
+        c.likes += 1;
+        saveState();
+        renderWatchComments(comments);
+      }
+    });
+  });
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   10. SPA VIEW RENDERERS: CHANNEL, SUBS, LIKED, LIBRARY
+   ─────────────────────────────────────────────────────────────── */
+function renderChannelPage(channelName) {
+  // Sync page metadata
+  document.getElementById("channel-header-name").textContent = channelName;
+  document.getElementById("channel-header-handle").textContent = `@${channelName.toLowerCase().replace(/\s+/g, "")}`;
+  
+  const creatorAvatar = `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(channelName)}`;
+  document.getElementById("channel-header-avatar").src = creatorAvatar;
+
+  // Filter channel's specific uploads
+  const creatorVideos = state.videos.filter(v => v.uploader === channelName);
+  document.getElementById("channel-header-video-count").textContent = `${creatorVideos.length} videos`;
+  document.getElementById("channel-about-desc").textContent = `Welcome to the official channel of ${channelName}! Enjoy cinematic travel clips, tutorials, and lifestyle walkthrough loops.`;
+
+  // Render video list
+  const grid = document.getElementById("channel-videos-grid");
+  if (creatorVideos.length === 0) {
+    grid.innerHTML = `<div class="empty-state" style="grid-column: 1/-1;"><h3>No uploads yet</h3></div>`;
+  } else {
+    grid.innerHTML = creatorVideos.map(v => `
+      <article class="image-card" data-id="${v.id}">
+        <div class="card-thumbnail">
+          <img src="${v.thumbnailUrl}" alt="${v.title}" />
+          <span class="duration-badge">${v.duration}</span>
+        </div>
+        <div class="card-body" style="padding: 0.75rem 0.25rem;">
+          <div class="card-info">
+            <a href="#watch?v=${v.id}"><p class="card-title">${escapeHtml(v.title)}</p></a>
+            <div class="card-meta">
+              <span class="card-stats">${formatNumber(v.views)} views • ${v.uploadTime}</span>
+            </div>
+          </div>
+        </div>
+      </article>
+    `).join("");
+
+    grid.querySelectorAll(".image-card").forEach(card => {
+      card.addEventListener("click", () => {
+        window.location.hash = `#watch?v=${card.dataset.id}`;
+      });
+    });
+  }
+
+  // Hook Channel page subscribe button
+  const subBtn = document.getElementById("channel-page-subscribe-btn");
+  const isSubbed = state.subscribedChannels.has(channelName);
+  subBtn.classList.toggle("subscribed", isSubbed);
+  subBtn.textContent = isSubbed ? "Subscribed" : "Subscribe";
+
+  subBtn.replaceWith(subBtn.cloneNode(true)); // remove previous listeners
+  const newSubBtn = document.getElementById("channel-page-subscribe-btn");
+  newSubBtn.addEventListener("click", () => {
+    if (state.subscribedChannels.has(channelName)) {
+      state.subscribedChannels.delete(channelName);
+      newSubBtn.textContent = "Subscribe";
+      newSubBtn.classList.remove("subscribed");
+      showToast(`Unsubscribed from ${channelName}`, "info");
+    } else {
+      state.subscribedChannels.add(channelName);
+      newSubBtn.textContent = "Subscribed";
+      newSubBtn.classList.add("subscribed");
+      showToast(`Subscribed to ${channelName}! 🔔`, "success");
+    }
+    saveState();
+  });
+}
+
+function renderSubscriptionsPage() {
+  const grid = document.getElementById("subscriptions-grid");
+  if (!grid) return;
+
+  const filtered = state.videos.filter(v => state.subscribedChannels.has(v.uploader));
+
+  if (filtered.length === 0) {
+    grid.innerHTML = `
+      <div class="empty-state" style="grid-column: 1 / -1; padding: 4rem 1rem;">
+        <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18z"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
+        <h3>Your subscriptions feed is empty</h3>
+        <p>Subscribe to channels from the watch pages to see their new releases here!</p>
+      </div>
+    `;
+    return;
+  }
+
+  grid.innerHTML = filtered.map(v => `
+    <article class="image-card" data-id="${v.id}">
+      <div class="card-thumbnail">
+        <img src="${v.thumbnailUrl}" alt="${v.title}" />
+        <span class="duration-badge">${v.duration}</span>
+      </div>
+      <div class="card-body">
         <div class="card-avatar">
-          <img src="${vid.uploaderAvatar}" alt="${vid.uploader}" loading="lazy" />
+          <img src="${v.uploaderAvatar}" alt="${v.uploader}" />
         </div>
         <div class="card-info">
-          <p class="card-title">${vid.title}</p>
+          <a href="#watch?v=${v.id}"><p class="card-title">${escapeHtml(v.title)}</p></a>
           <div class="card-meta">
-            <span class="card-uploader">${vid.uploader}</span>
+            <span class="card-uploader">${escapeHtml(v.uploader)}</span>
             <div class="card-stats">
-              <span>${vid.views} views</span>
-              <span class="dot">•</span>
-              <span>${vid.uploadTime}</span>
+              <span>${formatNumber(v.views)} views • ${v.uploadTime}</span>
             </div>
           </div>
         </div>
@@ -505,560 +1160,132 @@ function renderVideoGrid(onlyLiked = false, onlySubscribed = false) {
   `).join("");
 
   grid.querySelectorAll(".image-card").forEach(card => {
-    const openVideo = () => openDetailModal(Number(card.dataset.id));
-    card.addEventListener("click", openVideo);
-    card.addEventListener("keydown", (e) => {
-      if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openVideo(); }
+    card.addEventListener("click", () => {
+      window.location.hash = `#watch?v=${card.dataset.id}`;
     });
   });
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   9. LIBRARY & SHORTS VIEWS
-   ─────────────────────────────────────────────────────────────── */
-function renderLibraryView() {
-  const grid = document.getElementById("image-grid");
+function renderLikedPage() {
+  const grid = document.getElementById("liked-grid");
   if (!grid) return;
 
-  const likedCount = state.likedVideos.size;
-  const subCount = state.subscribedChannels.size;
-  const totalUploads = state.videos.filter(v => v.uploader === "You").length;
+  const filtered = state.videos.filter(v => state.likedVideos.has(v.id));
 
-  grid.innerHTML = `
-    <div class="library-view-container">
-      <div class="library-stats-card">
-        <h3>Library Dashboard</h3>
-        <p>Manage all your saved tracks, liked content, and channel updates in one place.</p>
-        <div class="library-metrics">
-          <div class="metric-box">
-            <span class="metric-num">${likedCount}</span>
-            <span class="metric-label">Liked Videos</span>
-          </div>
-          <div class="metric-box">
-            <span class="metric-num">${subCount}</span>
-            <span class="metric-label">Subscriptions</span>
-          </div>
-          <div class="metric-box">
-            <span class="metric-num">${totalUploads}</span>
-            <span class="metric-label">Your Uploads</span>
-          </div>
-        </div>
+  if (filtered.length === 0) {
+    grid.innerHTML = `
+      <div class="empty-state" style="grid-column: 1 / -1; padding: 4rem 1rem;">
+        <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+        <h3>No liked videos yet</h3>
+        <p>Videos you like will show up here.</p>
       </div>
-
-      <h2 class="library-sub-title">Your Uploaded Videos</h2>
-      <div class="library-uploads-grid" id="library-uploads-grid"></div>
-    </div>
-  `;
-
-  // Render user uploads
-  const uploadsGrid = document.getElementById("library-uploads-grid");
-  const userUploads = state.videos.filter(v => v.uploader === "You");
-
-  if (userUploads.length === 0) {
-    uploadsGrid.innerHTML = `<p class="no-uploads-text">You haven't uploaded any videos yet. Click "Upload" above to publish your first video.</p>`;
+    `;
     return;
   }
 
-  uploadsGrid.innerHTML = userUploads.map(vid => `
-    <div class="image-card" data-id="${vid.id}" tabindex="0" role="button">
+  grid.innerHTML = filtered.map(v => `
+    <article class="image-card" data-id="${v.id}">
       <div class="card-thumbnail">
-        <img src="${vid.thumbnailUrl}" alt="${vid.title}" />
-        <span class="video-duration-badge">${vid.duration}</span>
+        <img src="${v.thumbnailUrl}" alt="${v.title}" />
+        <span class="duration-badge">${v.duration}</span>
       </div>
       <div class="card-body">
+        <div class="card-avatar">
+          <img src="${v.uploaderAvatar}" alt="${v.uploader}" />
+        </div>
         <div class="card-info">
-          <p class="card-title">${vid.title}</p>
-          <p class="card-meta">${vid.views} views • ${vid.uploadTime}</p>
+          <a href="#watch?v=${v.id}"><p class="card-title">${escapeHtml(v.title)}</p></a>
+          <div class="card-meta">
+            <span class="card-uploader">${escapeHtml(v.uploader)}</span>
+            <div class="card-stats">
+              <span>${formatNumber(v.views)} views • ${v.uploadTime}</span>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
+    </article>
   `).join("");
 
-  uploadsGrid.querySelectorAll(".image-card").forEach(card => {
-    card.addEventListener("click", () => openDetailModal(Number(card.dataset.id)));
+  grid.querySelectorAll(".image-card").forEach(card => {
+    card.addEventListener("click", () => {
+      window.location.hash = `#watch?v=${card.dataset.id}`;
+    });
   });
 }
 
-function renderShortsView() {
-  const grid = document.getElementById("image-grid");
-  if (!grid) return;
+function renderLibraryPage() {
+  const historyGrid = document.getElementById("history-grid");
+  const laterGrid = document.getElementById("watch-later-grid");
 
-  grid.innerHTML = `
-    <div class="shorts-container">
-      <div class="shorts-wrapper-scroller">
-        ${MOCK_SHORTS.map((short, idx) => `
-          <div class="short-slide" id="short-slide-${short.id}">
-            <div class="short-video-container">
-              <video class="short-player" src="${short.url}" loop playsinline ${idx === 0 ? "autoplay" : ""}></video>
-              
-              <!-- Custom vertical details overlay -->
-              <div class="short-overlay-details">
-                <p class="short-channel-name">@${short.channel}</p>
-                <p class="short-video-title">${short.title}</p>
-              </div>
+  // Render History
+  const historyVideos = state.watchHistory
+    .map(id => state.videos.find(v => v.id === id))
+    .filter(Boolean);
 
-              <!-- Action buttons -->
-              <div class="short-sidebar-actions">
-                <button class="short-action-btn like" onclick="handleShortLike(this, ${short.id})">
-                  <div class="short-icon-circle">
-                    <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
-                      <path d="M1 21h4V9H1v12zm22-11c0-1.1-.9-2-2-2h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L14.17 1 7.59 7.59C7.22 7.95 7 8.45 7 9v10c0 1.1.9 2 2 2h9c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-2z"/>
-                    </svg>
-                  </div>
-                  <span>${short.likes}</span>
-                </button>
-                
-                <div class="short-action-btn">
-                  <div class="short-icon-circle">
-                    <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
-                      <path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 9h12v2H6V9zm8 5H6v-2h8v2zm4-6H6V6h12v2z"/>
-                    </svg>
-                  </div>
-                  <span>${short.comments}</span>
-                </div>
-
-                <div class="short-action-btn" onclick="handleShare()">
-                  <div class="short-icon-circle">
-                    <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
-                      <path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/>
-                    </svg>
-                  </div>
-                  <span>Share</span>
-                </div>
-              </div>
+  if (historyVideos.length === 0) {
+    historyGrid.innerHTML = `<p class="text-sm text-muted" style="padding: 1rem 0;">No watch history yet.</p>`;
+  } else {
+    historyGrid.innerHTML = historyVideos.map(v => `
+      <article class="image-card" data-id="${v.id}">
+        <div class="card-thumbnail">
+          <img src="${v.thumbnailUrl}" alt="${v.title}" />
+          <span class="duration-badge">${v.duration}</span>
+        </div>
+        <div class="card-body" style="padding: 0.75rem 0.25rem;">
+          <div class="card-info">
+            <a href="#watch?v=${v.id}"><p class="card-title">${escapeHtml(v.title)}</p></a>
+            <div class="card-meta">
+              <span class="card-uploader">${escapeHtml(v.uploader)}</span>
+              <span class="card-stats">${formatNumber(v.views)} views</span>
             </div>
           </div>
-        `).join("")}
-      </div>
-    </div>
-  `;
+        </div>
+      </article>
+    `).join("");
 
-  const scroller = grid.querySelector(".shorts-wrapper-scroller");
-  if (scroller) {
-    scroller.addEventListener("scroll", () => {
-      const slides = scroller.querySelectorAll(".short-slide");
-      slides.forEach(slide => {
-        const video = slide.querySelector("video");
-        const rect = slide.getBoundingClientRect();
-        const scrollerRect = scroller.getBoundingClientRect();
-        if (Math.abs(rect.top - scrollerRect.top) < rect.height / 2) {
-          if (video.paused) {
-            video.play().catch(() => {});
-          }
-        } else {
-          if (!video.paused) {
-            video.pause();
-          }
-        }
+    historyGrid.querySelectorAll(".image-card").forEach(card => {
+      card.addEventListener("click", () => {
+        window.location.hash = `#watch?v=${card.dataset.id}`;
+      });
+    });
+  }
+
+  // Render Watch Later
+  const laterVideos = state.videos.filter(v => state.watchLater.has(v.id));
+
+  if (laterVideos.length === 0) {
+    laterGrid.innerHTML = `<p class="text-sm text-muted" style="padding: 1rem 0;">No videos saved to watch later.</p>`;
+  } else {
+    laterGrid.innerHTML = laterVideos.map(v => `
+      <article class="image-card" data-id="${v.id}">
+        <div class="card-thumbnail">
+          <img src="${v.thumbnailUrl}" alt="${v.title}" />
+          <span class="duration-badge">${v.duration}</span>
+        </div>
+        <div class="card-body" style="padding: 0.75rem 0.25rem;">
+          <div class="card-info">
+            <a href="#watch?v=${v.id}"><p class="card-title">${escapeHtml(v.title)}</p></a>
+            <div class="card-meta">
+              <span class="card-uploader">${escapeHtml(v.uploader)}</span>
+              <span class="card-stats">${formatNumber(v.views)} views</span>
+            </div>
+          </div>
+        </div>
+      </article>
+    `).join("");
+
+    laterGrid.querySelectorAll(".image-card").forEach(card => {
+      card.addEventListener("click", () => {
+        window.location.hash = `#watch?v=${card.dataset.id}`;
       });
     });
   }
 }
 
-function handleShortLike(btn, id) {
-  btn.classList.toggle("liked");
-  const iconCircle = btn.querySelector(".short-icon-circle");
-  iconCircle.classList.add("like-pop");
-  setTimeout(() => iconCircle.classList.remove("like-pop"), 300);
-  showToast("Liked Short video!", "success", 2000);
-}
-
 /* ═══════════════════════════════════════════════════════════════
-   10. DETAIL MODAL & CUSTOM PLAYER
-   ─────────────────────────────────────────────────────────────── */
-let playerState = {
-  isDraggingScrubber: false
-};
-
-function openDetailModal(videoId) {
-  const vid = state.videos.find(v => v.id === videoId);
-  if (!vid) return;
-
-  state.activeModal   = "detail";
-  state.activeVideoId = videoId;
-
-  const liked = state.likedVideos.has(videoId);
-  const subscribed = state.subscribedChannels.has(vid.uploader);
-
-  const videoElement = document.getElementById("modal-video");
-  videoElement.src = vid.url;
-  videoElement.playbackRate = 1.0;
-
-  document.getElementById("modal-category-tag").textContent = vid.category;
-  document.getElementById("modal-title").textContent = vid.title;
-  document.getElementById("modal-description").textContent = vid.description;
-  document.getElementById("modal-uploader-avatar").src = vid.uploaderAvatar;
-  document.getElementById("modal-uploader-name").textContent = vid.uploader;
-  document.getElementById("modal-uploader-subs").textContent = vid.subscribers;
-  document.getElementById("modal-views").textContent = `${vid.views} views`;
-  document.getElementById("modal-time").textContent = vid.uploadTime;
-
-  const likeBtn = document.getElementById("like-btn");
-  likeBtn.classList.toggle("liked", liked);
-  document.getElementById("like-count").textContent = formatNumber(vid.likes);
-
-  const subBtn = document.getElementById("subscribe-btn");
-  if (subscribed) {
-    subBtn.textContent = "Subscribed";
-    subBtn.classList.add("subscribed");
-  } else {
-    subBtn.textContent = "Subscribe";
-    subBtn.classList.remove("subscribed");
-  }
-
-  renderComments(vid.comments);
-
-  document.getElementById("detail-modal").classList.add("open");
-  document.body.style.overflow = "hidden";
-
-  setupCustomPlayer();
-
-  videoElement.play().catch(() => {
-    document.getElementById("large-play-overlay").style.display = "flex";
-  });
-}
-
-function closeDetailModal() {
-  const videoElement = document.getElementById("modal-video");
-  if (videoElement) {
-    videoElement.pause();
-    videoElement.src = "";
-  }
-
-  document.getElementById("detail-modal").classList.remove("open");
-  document.body.style.overflow = "";
-
-  document.getElementById("detail-modal-inner").classList.remove("theater-mode");
-
-  state.activeModal   = null;
-  state.activeVideoId = null;
-}
-
-function setupCustomPlayer() {
-  const video = document.getElementById("modal-video");
-  const playPauseBtn = document.getElementById("play-pause-btn");
-  const playIcon = document.getElementById("play-icon");
-  const pauseIcon = document.getElementById("pause-icon");
-  const muteBtn = document.getElementById("mute-btn");
-  const volumeIcon = document.getElementById("volume-icon");
-  const volumeSlider = document.getElementById("volume-slider");
-  const timeCurrent = document.getElementById("time-current");
-  const timeDuration = document.getElementById("time-duration");
-  
-  const progressContainer = document.getElementById("progress-container");
-  const progressElapsed = document.getElementById("progress-elapsed");
-  const progressBuffered = document.getElementById("progress-buffered");
-  const progressScrubber = document.getElementById("progress-scrubber");
-
-  const speedBtn = document.getElementById("speed-btn");
-  const speedMenu = document.getElementById("speed-menu");
-  const theaterBtn = document.getElementById("theater-btn");
-  const fullscreenBtn = document.getElementById("fullscreen-btn");
-  const videoContainer = document.getElementById("video-container");
-  const largePlayBtn = document.getElementById("large-play-overlay");
-
-  if (!video) return;
-
-  video.volume = volumeSlider.value;
-  video.muted = false;
-
-  function togglePlay() {
-    if (video.paused) {
-      video.play().then(() => {
-        largePlayBtn.style.display = "none";
-      }).catch(() => {});
-    } else {
-      video.pause();
-    }
-  }
-
-  video.onclick = togglePlay;
-  largePlayBtn.onclick = togglePlay;
-  playPauseBtn.onclick = togglePlay;
-
-  video.onplay = () => {
-    playIcon.style.display = "none";
-    pauseIcon.style.display = "block";
-    largePlayBtn.style.display = "none";
-  };
-
-  video.onpause = () => {
-    playIcon.style.display = "block";
-    pauseIcon.style.display = "none";
-  };
-
-  volumeSlider.oninput = (e) => {
-    video.volume = e.target.value;
-    video.muted = video.volume === 0;
-    updateVolumeUI();
-  };
-
-  muteBtn.onclick = () => {
-    video.muted = !video.muted;
-    if (!video.muted && video.volume === 0) {
-      video.volume = 0.5;
-      volumeSlider.value = 0.5;
-    }
-    updateVolumeUI();
-  };
-
-  function updateVolumeUI() {
-    volumeSlider.value = video.muted ? 0 : video.volume;
-    if (video.muted || video.volume === 0) {
-      volumeIcon.innerHTML = `<polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/>`;
-    } else {
-      volumeIcon.innerHTML = `<polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/>`;
-    }
-  }
-
-  function formatTime(seconds) {
-    if (isNaN(seconds) || seconds === Infinity) return "0:00";
-    const h = Math.floor(seconds / 3600);
-    const m = Math.floor((seconds % 3600) / 60);
-    const s = Math.floor(seconds % 60);
-    const formattedSeconds = s < 10 ? `0${s}` : s;
-    if (h > 0) {
-      const formattedMinutes = m < 10 ? `0${m}` : m;
-      return `${h}:${formattedMinutes}:${formattedSeconds}`;
-    }
-    return `${m}:${formattedSeconds}`;
-  }
-
-  video.onloadedmetadata = () => {
-    timeDuration.textContent = formatTime(video.duration);
-    timeCurrent.textContent = formatTime(video.currentTime);
-  };
-
-  video.ontimeupdate = () => {
-    timeCurrent.textContent = formatTime(video.currentTime);
-    if (!playerState.isDraggingScrubber && video.duration) {
-      const percentage = (video.currentTime / video.duration) * 100;
-      progressElapsed.style.width = `${percentage}%`;
-      progressScrubber.style.left = `${percentage}%`;
-    }
-    updateBufferedLine();
-  };
-
-  function updateBufferedLine() {
-    if (video.buffered.length > 0 && video.duration) {
-      const bufferedEnd = video.buffered.end(video.buffered.length - 1);
-      const percentage = (bufferedEnd / video.duration) * 100;
-      progressBuffered.style.width = `${percentage}%`;
-    }
-  }
-
-  function seekVideo(e) {
-    const rect = progressContainer.getBoundingClientRect();
-    let posX = (e.clientX - rect.left) / rect.width;
-    if (posX < 0) posX = 0;
-    if (posX > 1) posX = 1;
-
-    progressElapsed.style.width = `${posX * 100}%`;
-    progressScrubber.style.left = `${posX * 100}%`;
-    video.currentTime = posX * video.duration;
-  }
-
-  progressContainer.onmousedown = (e) => {
-    playerState.isDraggingScrubber = true;
-    seekVideo(e);
-    
-    document.onmousemove = (moveEvent) => {
-      seekVideo(moveEvent);
-    };
-
-    document.onmouseup = () => {
-      playerState.isDraggingScrubber = false;
-      document.onmousemove = null;
-      document.onmouseup = null;
-    };
-  };
-
-  fullscreenBtn.onclick = () => {
-    if (!document.fullscreenElement) {
-      videoContainer.requestFullscreen().catch(() => {});
-    } else {
-      document.exitFullscreen();
-    }
-  };
-
-  theaterBtn.onclick = () => {
-    const modalInner = document.getElementById("detail-modal-inner");
-    modalInner.classList.toggle("theater-mode");
-  };
-
-  speedBtn.onclick = (e) => {
-    e.stopPropagation();
-    speedMenu.classList.toggle("open");
-  };
-
-  document.addEventListener("click", () => {
-    if (speedMenu) speedMenu.classList.remove("open");
-  });
-
-  speedMenu.querySelectorAll(".speed-option").forEach(btn => {
-    btn.onclick = (e) => {
-      e.stopPropagation();
-      const rate = parseFloat(btn.dataset.speed);
-      video.playbackRate = rate;
-      speedBtn.textContent = btn.textContent;
-      speedMenu.querySelectorAll(".speed-option").forEach(b => b.classList.remove("active"));
-      btn.classList.add("active");
-      speedMenu.classList.remove("open");
-      showToast(`Playback speed set to ${rate}x`, "info", 1500);
-    };
-  });
-}
-
-/* ═══════════════════════════════════════════════════════════════
-   11. INTERACTIVE EVENTS: LIKE & SUBSCRIBE
-   ─────────────────────────────────────────────────────────────── */
-function handleLike() {
-  const imageId = state.activeVideoId;
-  if (!imageId) return;
-
-  const vid = state.videos.find(v => v.id === imageId);
-  if (!vid) return;
-
-  const likeBtn = document.getElementById("like-btn");
-
-  if (state.likedVideos.has(imageId)) {
-    state.likedVideos.delete(imageId);
-    vid.likes -= 1;
-    likeBtn.classList.remove("liked");
-    showToast("Removed from liked videos", "info", 2000);
-  } else {
-    state.likedVideos.add(imageId);
-    vid.likes += 1;
-    likeBtn.classList.add("liked");
-    likeBtn.querySelector("svg").classList.add("like-pop");
-    setTimeout(() => likeBtn.querySelector("svg").classList.remove("like-pop"), 300);
-    showToast("Added to Liked videos ❤️", "success", 2000);
-  }
-
-  document.getElementById("like-count").textContent = formatNumber(vid.likes);
-  if (state.currentView === "liked") renderVideoGrid(true);
-}
-
-function handleShare() {
-  const imageId = state.activeVideoId || "general";
-  const mockUrl = `${window.location.origin}/watch?v=${imageId}`;
-
-  if (navigator.clipboard && navigator.clipboard.writeText) {
-    navigator.clipboard.writeText(mockUrl).then(() => {
-      showToast("Video link copied to clipboard!", "success");
-    }).catch(() => {
-      showToast("Link: " + mockUrl, "info");
-    });
-  } else {
-    window.prompt("Share link:", mockUrl);
-  }
-}
-
-function handleDownload() {
-  showToast("Preparing offline MP4 stream package...", "info", 2000);
-  setTimeout(() => {
-    showToast("Download started successfully! 💾", "success", 2500);
-  }, 1000);
-}
-
-function toggleSubscribe() {
-  const videoId = state.activeVideoId;
-  if (!videoId) return;
-  const vid = state.videos.find(v => v.id === videoId);
-  if (!vid) return;
-
-  const subBtn = document.getElementById("subscribe-btn");
-  const isSubscribed = state.subscribedChannels.has(vid.uploader);
-
-  if (isSubscribed) {
-    state.subscribedChannels.delete(vid.uploader);
-    subBtn.textContent = "Subscribe";
-    subBtn.classList.remove("subscribed");
-    showToast(`Unsubscribed from ${vid.uploader}`, "info");
-  } else {
-    state.subscribedChannels.add(vid.uploader);
-    subBtn.textContent = "Subscribed";
-    subBtn.classList.add("subscribed");
-    showToast(`Subscribed to ${vid.uploader}! 🔔`, "success");
-  }
-}
-
-/* ═══════════════════════════════════════════════════════════════
-   12. COMMENT SYSTEM
-   ─────────────────────────────────────────────────────────────── */
-function renderComments(comments) {
-  const list = document.getElementById("comments-list");
-  if (!list) return;
-
-  if (comments.length === 0) {
-    list.innerHTML = `<p class="text-sm text-muted" style="padding: 0.5rem 0">No comments yet. Be the first to comment!</p>`;
-    return;
-  }
-
-  list.innerHTML = comments.map(c => `
-    <div class="comment-item">
-      <div class="comment-avatar">
-        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(c.user)}"
-             alt="${c.user}" loading="lazy" />
-      </div>
-      <div class="comment-bubble">
-        <p class="comment-username">${c.user}</p>
-        <p class="comment-text">${escapeHtml(c.text)}</p>
-        <p class="comment-time">${c.time}</p>
-      </div>
-    </div>
-  `).join("");
-}
-
-function escapeHtml(str) {
-  return str
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
-}
-
-function handleAddComment() {
-  const input = document.getElementById("comment-input");
-  const text = input.value.trim();
-  const videoId = state.activeVideoId;
-
-  if (!text) {
-    showToast("Write a comment first", "warning", 2000);
-    return;
-  }
-
-  const vid = state.videos.find(v => v.id === videoId);
-  if (!vid) return;
-
-  let username = "You";
-  try {
-    const user = JSON.parse(sessionStorage.getItem("youtube_user") || "{}");
-    username = user.username || "You";
-  } catch (_) {}
-
-  const newComment = {
-    user: username,
-    text: text,
-    time: "Just now"
-  };
-  vid.comments.unshift(newComment);
-
-  input.value = "";
-  renderComments(vid.comments);
-
-  const list = document.getElementById("comments-list");
-  if (list) list.scrollTop = 0;
-
-  showToast("Comment posted!", "success", 2000);
-}
-
-/* ═══════════════════════════════════════════════════════════════
-   13. UPLOAD SYSTEM
+   11. DYNAMIC UPLOADER SYSTEM
    ─────────────────────────────────────────────────────────────── */
 function openUploadModal() {
-  state.activeModal = "upload";
   document.getElementById("upload-modal").classList.add("open");
   document.body.style.overflow = "hidden";
 }
@@ -1066,38 +1293,35 @@ function openUploadModal() {
 function closeUploadModal() {
   document.getElementById("upload-modal").classList.remove("open");
   document.body.style.overflow = "";
-  state.activeModal = null;
   document.getElementById("upload-form").reset();
-  resetDropZone();
-}
-
-function resetDropZone() {
   const preview = document.getElementById("drop-preview");
   const dropContent = document.getElementById("drop-content");
   if (preview) { preview.style.display = "none"; preview.src = ""; }
   if (dropContent) dropContent.style.display = "block";
 }
 
+function handleUploadFileSelect(file) {
+  const preview = document.getElementById("drop-preview");
+  const dropContent = document.getElementById("drop-content");
+  
+  // Set a mock thumbnail for the video card preview
+  preview.src = "https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=600&q=70";
+  preview.style.display = "block";
+  dropContent.style.display = "none";
+  showToast(`File selected: ${file.name}`, "info");
+}
+
 function initUploadModal() {
-  const dropZone   = document.getElementById("drop-zone");
-  const fileInput  = document.getElementById("file-input");
-  const preview    = document.getElementById("drop-preview");
-  const dropContent= document.getElementById("drop-content");
+  const dropZone = document.getElementById("drop-zone");
+  const fileInput = document.getElementById("file-input");
 
   if (!dropZone) return;
 
-  dropZone.addEventListener("click", (e) => {
-    if (e.target.closest("#drop-preview")) return;
-    fileInput.click();
-  });
-
-  dropZone.addEventListener("keydown", (e) => {
-    if (e.key === "Enter" || e.key === " ") { e.preventDefault(); fileInput.click(); }
-  });
-
+  dropZone.addEventListener("click", () => fileInput.click());
+  
   fileInput.addEventListener("change", () => {
     const file = fileInput.files[0];
-    if (file) handleFileSelected(file, preview, dropContent);
+    if (file) handleUploadFileSelect(file);
   });
 
   dropZone.addEventListener("dragover", (e) => {
@@ -1105,156 +1329,81 @@ function initUploadModal() {
     dropZone.classList.add("drag-over");
   });
 
-  dropZone.addEventListener("dragleave", (e) => {
-    if (!dropZone.contains(e.relatedTarget)) {
-      dropZone.classList.remove("drag-over");
-    }
+  dropZone.addEventListener("dragleave", () => {
+    dropZone.classList.remove("drag-over");
   });
 
   dropZone.addEventListener("drop", (e) => {
     e.preventDefault();
     dropZone.classList.remove("drag-over");
     const file = e.dataTransfer.files[0];
-    if (file) {
-      handleFileSelected(file, preview, dropContent);
+    if (file) handleUploadFileSelect(file);
+  });
+
+  // Handle Form Submission
+  document.getElementById("upload-form").addEventListener("submit", (e) => {
+    e.preventDefault();
+
+    const title = document.getElementById("upload-title").value.trim();
+    const category = document.getElementById("upload-category").value;
+    const desc = document.getElementById("upload-desc").value.trim();
+    const customUrl = document.getElementById("upload-url").value.trim();
+
+    if (!title) {
+      showToast("Title is required", "warning");
+      return;
     }
-  });
 
-  document.getElementById("upload-form").addEventListener("submit", handleUploadSubmit);
-}
+    // Default mock uploader username
+    let user = { username: "You", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=you" };
+    try {
+      const stored = sessionStorage.getItem("pictube_user");
+      if (stored) user = JSON.parse(stored);
+    } catch (_) {}
 
-function handleFileSelected(file, preview, dropContent) {
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    preview.src = e.target.result;
-    preview.style.display = "block";
-    if (dropContent) dropContent.style.display = "none";
-  };
-  reader.readAsDataURL(file);
-}
-
-function handleUploadSubmit(e) {
-  e.preventDefault();
-
-  const title    = document.getElementById("upload-title").value.trim();
-  const category = document.getElementById("upload-category").value;
-  const desc     = document.getElementById("upload-desc").value.trim();
-  const preview  = document.getElementById("drop-preview");
-
-  if (!title) { showToast("Enter a video title", "warning"); return; }
-  if (!category) { showToast("Select a category", "warning"); return; }
-
-  let username = "You";
-  let avatarUrl = `https://api.dicebear.com/7.x/avataaars/svg?seed=you`;
-  try {
-    const user = JSON.parse(sessionStorage.getItem("youtube_user") || "{}");
-    username = user.username || "You";
-    avatarUrl = user.avatar || avatarUrl;
-  } catch (_) {}
-
-  const mockVideosPaths = [
-    "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4",
-    "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
-    "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4"
-  ];
-  const chosenVideo = mockVideosPaths[Math.floor(Math.random() * mockVideosPaths.length)];
-
-  const localThumbnailSrc = preview.src && preview.src !== window.location.href
-    ? preview.src
-    : `https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=800&q=80`;
-
-  const newVideo = {
-    id:            Date.now(),
-    title,
-    description:   desc || "No description provided.",
-    category,
-    url:           chosenVideo,
-    thumbnailUrl:  localThumbnailSrc,
-    uploader:      username,
-    uploaderAvatar:avatarUrl,
-    views:         "0",
-    uploadTime:    "Just now",
-    duration:      "4:15",
-    likes:         0,
-    subscribers:   "0 subscribers",
-    comments:      []
-  };
-
-  state.videos.unshift(newVideo);
-
-  closeUploadModal();
-  if (state.currentView !== "home") selectView("home");
-  else renderVideoGrid();
-
-  showToast(`"${title}" published successfully! 🚀`, "success");
-}
-
-/* ═══════════════════════════════════════════════════════════════
-   14. VOICE SEARCH INTEGRATION
-   ─────────────────────────────────────────────────────────────── */
-function initVoiceSearch() {
-  const micBtn = document.getElementById("voice-search-btn");
-  const overlay = document.getElementById("voice-overlay");
-  const statusText = document.getElementById("voice-status");
-  const closeBtn = document.getElementById("voice-close-btn");
-  const searchInput = document.getElementById("search-input");
-
-  if (!micBtn || !overlay) return;
-
-  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-  
-  if (!SpeechRecognition) {
-    micBtn.style.display = "none";
-    return;
-  }
-
-  const recognition = new SpeechRecognition();
-  recognition.continuous = false;
-  recognition.lang = "en-US";
-  recognition.interimResults = false;
-  recognition.maxAlternatives = 1;
-
-  micBtn.addEventListener("click", () => {
-    overlay.classList.add("open");
-    statusText.textContent = "Listening...";
-    recognition.start();
-  });
-
-  closeBtn.addEventListener("click", () => {
-    recognition.abort();
-    overlay.classList.remove("open");
-  });
-
-  recognition.onresult = (event) => {
-    const transcript = event.results[0][0].transcript;
-    statusText.textContent = `Search for: "${transcript}"`;
-    searchInput.value = transcript;
-    state.searchQuery = transcript;
+    const videoUrl = customUrl || "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4";
     
-    setTimeout(() => {
-      overlay.classList.remove("open");
-      if (state.currentView !== "home") selectView("home");
-      renderVideoGrid();
-      showToast(`Searching for "${transcript}"`, "success", 2000);
-    }, 1000);
-  };
+    // Choose a high-quality mockup category-specific splash image if no custom preview
+    let thumb = "https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=600&q=70";
+    if (category === "Nature") thumb = "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=600&q=70";
+    if (category === "Technology") thumb = "https://images.unsplash.com/photo-1518770660439-4636190af475?w=600&q=70";
+    if (category === "Music") thumb = "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=600&q=70";
 
-  recognition.onerror = (e) => {
-    statusText.textContent = "Voice search error. Try again.";
-    console.error("Speech Recognition Error", e);
-    setTimeout(() => overlay.classList.remove("open"), 1500);
-  };
+    const newVideo = {
+      id: "v_" + Date.now(),
+      title: title,
+      description: desc || "No description provided.",
+      category: category,
+      videoUrl: videoUrl,
+      thumbnailUrl: thumb,
+      uploader: user.username || "You",
+      uploaderAvatar: user.avatar || "https://api.dicebear.com/7.x/avataaars/svg?seed=you",
+      views: 0,
+      uploadTime: "Just now",
+      duration: "0:15",
+      likes: 0,
+      dislikes: 0,
+      comments: []
+    };
 
-  recognition.onspeechend = () => {
-    recognition.stop();
-  };
+    state.videos.unshift(newVideo);
+    saveState();
+
+    closeUploadModal();
+    
+    // Go to feed view
+    window.location.hash = "#feed";
+    navigateToRoute();
+    
+    showToast(`"${title}" published successfully! 🚀`, "success");
+  });
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   15. HYDRATE USER
+   12. USER UI HYDRATION & SEARCH
    ─────────────────────────────────────────────────────────────── */
 function hydrateUserUI() {
-  let user = { username: "Guest Channel", email: "guest@youtube.com", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=guest" };
+  let user = { username: "Guest", email: "guest@viewtube.com", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=guest" };
   try {
     const stored = sessionStorage.getItem("youtube_user");
     if (stored) user = JSON.parse(stored);
@@ -1263,126 +1412,163 @@ function hydrateUserUI() {
   const avatarImg = document.getElementById("header-avatar-img");
   if (avatarImg) avatarImg.src = user.avatar;
 
-  const nameEl  = document.getElementById("dropdown-username");
+  const nameEl = document.getElementById("dropdown-username");
   const emailEl = document.getElementById("dropdown-email");
-  if (nameEl)  nameEl.textContent  = user.username || "Channel Owner";
-  if (emailEl) emailEl.textContent = user.email    || "";
+  if (nameEl) nameEl.textContent = user.username;
+  if (emailEl) emailEl.textContent = user.email;
+
+  // Sync avatar inside watch comments row
+  const commentAvatar = document.getElementById("comment-user-avatar");
+  if (commentAvatar) commentAvatar.src = user.avatar;
+}
+
+function initSearch() {
+  const searchInput = document.getElementById("search-input");
+  if (!searchInput) return;
+
+  searchInput.addEventListener("input", (e) => {
+    state.searchQuery = e.target.value.trim();
+    if (state.activeView !== "feed") {
+      window.location.hash = "#feed";
+    }
+    renderImageGrid();
+  });
+}
+
+function escapeHtml(str) {
+  if (!str) return "";
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   16. APPLICATION BOOT
+   13. APPLICATION BOOT
    ─────────────────────────────────────────────────────────────── */
 document.addEventListener("DOMContentLoaded", () => {
+  // ── A. Load data from localstorage ──
+  loadState();
+
+  // ── B. Populate user profile ──
   hydrateUserUI();
+
+  // ── C. Apply saved theme ──
   initTheme();
 
+  // ── D. Theme Toggle ──
   const themeTrack = document.getElementById("theme-track");
   if (themeTrack) themeTrack.addEventListener("click", toggleTheme);
 
+  // ── E. Mobile menu togglers ──
   const hamburgerBtn = document.getElementById("hamburger-btn");
   if (hamburgerBtn) hamburgerBtn.addEventListener("click", openSidebar);
 
   const sidebarOverlay = document.getElementById("sidebar-overlay");
   if (sidebarOverlay) sidebarOverlay.addEventListener("click", closeSidebar);
 
+  // ── F. Avatar Dropdown click ──
   const avatarBtn = document.getElementById("avatar-btn");
-  if (avatarBtn) avatarBtn.addEventListener("click", (e) => {
-    e.stopPropagation();
-    toggleAvatarDropdown();
-  });
-  document.addEventListener("click", handleDocumentClick);
-
-  const logoutBtn = document.getElementById("logout-btn");
-  if (logoutBtn) logoutBtn.addEventListener("click", () => {
-    if (typeof logout === "function") logout();
-  });
-
-  const viewMap = {
-    "sidebar-home": "home",
-    "sidebar-shorts": "shorts",
-    "sidebar-subscriptions": "subscriptions",
-    "sidebar-library": "library",
-    "sidebar-liked": "liked"
-  };
-
-  Object.keys(viewMap).forEach(btnId => {
-    const btn = document.getElementById(btnId);
-    if (btn) {
-      btn.addEventListener("click", () => {
-        selectView(viewMap[btnId]);
-      });
-    }
-  });
-
-  renderCategoryChips();
-  initSearch();
-  renderVideoGrid();
-
-  const uploadBtn = document.getElementById("upload-btn");
-  if (uploadBtn) uploadBtn.addEventListener("click", openUploadModal);
-
-  const uploadModalBackdrop = document.getElementById("upload-modal");
-  if (uploadModalBackdrop) {
-    uploadModalBackdrop.addEventListener("click", (e) => {
-      if (e.target === uploadModalBackdrop) closeUploadModal();
+  if (avatarBtn) {
+    avatarBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const dropdown = document.getElementById("avatar-dropdown");
+      dropdown.classList.toggle("open");
     });
   }
+  document.addEventListener("click", () => {
+    const dropdown = document.getElementById("avatar-dropdown");
+    if (dropdown) dropdown.classList.remove("open");
+  });
+
+  // ── G. Logout ──
+  const logoutBtn = document.getElementById("logout-btn");
+  if (logoutBtn) {
+    logoutBtn.addEventListener("click", () => {
+      if (typeof logout === "function") logout();
+    });
+  }
+
+  // ── H. Category chips bar ──
+  renderCategoryChips();
+  const bar = document.getElementById("category-bar");
+  if (bar) {
+    bar.addEventListener("click", (e) => {
+      const chip = e.target.closest(".chip");
+      if (!chip) return;
+      state.currentCategory = chip.dataset.category;
+      bar.querySelectorAll(".chip").forEach(c => {
+        c.classList.toggle("active", c.dataset.category === state.currentCategory);
+      });
+      renderImageGrid();
+    });
+  }
+
+  // ── I. Live search ──
+  initSearch();
+
+  // ── J. Upload modal events ──
+  const uploadBtn = document.getElementById("upload-btn");
+  if (uploadBtn) uploadBtn.addEventListener("click", openUploadModal);
 
   const closeUploadBtn = document.getElementById("close-upload-modal");
   if (closeUploadBtn) closeUploadBtn.addEventListener("click", closeUploadModal);
 
+  const uploadModal = document.getElementById("upload-modal");
+  if (uploadModal) {
+    uploadModal.addEventListener("click", (e) => {
+      if (e.target === uploadModal) closeUploadModal();
+    });
+  }
   initUploadModal();
 
-  const detailModalBackdrop = document.getElementById("detail-modal");
-  if (detailModalBackdrop) {
-    detailModalBackdrop.addEventListener("click", (e) => {
-      if (e.target === detailModalBackdrop) closeDetailModal();
+  // ── K. Library actions ──
+  const clearHistBtn = document.getElementById("clear-history-btn");
+  if (clearHistBtn) {
+    clearHistBtn.addEventListener("click", () => {
+      state.watchHistory = [];
+      saveState();
+      renderLibraryPage();
+      showToast("Watch history cleared", "info");
     });
   }
 
-  const closeDetailBtn = document.getElementById("close-detail-modal");
-  if (closeDetailBtn) closeDetailBtn.addEventListener("click", closeDetailModal);
-
-  const likeBtn     = document.getElementById("like-btn");
-  const shareBtn    = document.getElementById("share-btn");
-  const downloadBtn = document.getElementById("download-btn");
-  const subBtn      = document.getElementById("subscribe-btn");
-
-  if (likeBtn)     likeBtn.addEventListener("click", handleLike);
-  if (shareBtn)    shareBtn.addEventListener("click", handleShare);
-  if (downloadBtn) downloadBtn.addEventListener("click", handleDownload);
-  if (subBtn)      subBtn.addEventListener("click", toggleSubscribe);
-
-  const commentBtn = document.getElementById("comment-submit");
-  if (commentBtn) commentBtn.addEventListener("click", handleAddComment);
-
-  const commentInput = document.getElementById("comment-input");
-  if (commentInput) {
-    commentInput.addEventListener("keydown", (e) => {
-      if (e.key === "Enter" && !e.shiftKey) {
-        e.preventDefault();
-        handleAddComment();
-      }
-    });
-  }
-
-  initVoiceSearch();
-
+  // ── L. Escape listener for modals ──
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape") {
-      if (state.activeModal === "detail") closeDetailModal();
-      if (state.activeModal === "upload") closeUploadModal();
-      closeAvatarDropdown();
+      closeUploadModal();
       closeSidebar();
     }
   });
 
+  // ── M. Channel Navigation Tab switches ──
+  document.querySelectorAll(".tab-item").forEach(tab => {
+    tab.addEventListener("click", () => {
+      document.querySelectorAll(".tab-item").forEach(t => t.classList.remove("active"));
+      tab.classList.add("active");
+      
+      const panel = tab.dataset.tab;
+      document.getElementById("channel-panel-videos").style.display = panel === "videos" ? "block" : "none";
+      document.getElementById("channel-panel-about").style.display = panel === "about" ? "block" : "none";
+    });
+  });
+
+  // ── N. Init Watch view UI button events ──
+  initWatchInteractions();
+
+  // ── O. Hash SPA routing initial start ──
+  window.addEventListener("hashchange", navigateToRoute);
+  navigateToRoute();
+
+  // ── P. Welcome notification toast ──
   setTimeout(() => {
     let name = "there";
     try {
       const user = JSON.parse(sessionStorage.getItem("youtube_user") || "{}");
       name = user.username || "there";
     } catch (_) {}
-    showToast(`Welcome back, ${name}! 👋`, "success", 3000);
-  }, 600);
+    showToast(`Welcome to ViewTube, ${name}! 🎬`, "success", 2500);
+  }, 800);
 });

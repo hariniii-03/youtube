@@ -192,8 +192,8 @@ function togglePasswordVisibility() {
 // 10. BOOT — runs when the login page's DOM is ready
 // ─────────────────────────────────────────────
 document.addEventListener("DOMContentLoaded", () => {
-  // If the user is already logged in, skip the login page
-  if (sessionStorage.getItem("youtube_user")) {
+  // If the user is already logged in and we are on the login page, skip the login page
+  if (sessionStorage.getItem("pictube_user") && document.getElementById("login-form")) {
     window.location.href = "index.html";
     return;
   }

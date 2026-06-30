@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>PicTube — Discover Stunning Images</title>
+  <title>ViewTube — Discover Stunning Videos</title>
 
   <!-- Google Fonts: Inter (body) + Outfit (display headings) -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -32,40 +32,32 @@
   </button>
 
   <!-- Logo -->
-  <a class="logo" href="index.html" aria-label="YouTube Home">
+  <a class="logo" href="#feed" aria-label="ViewTube Home">
     <div class="logo-icon" aria-hidden="true">
       <svg width="18" height="18" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
         <path d="M23 7L16 12L23 17V7Z"/>
         <rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
       </svg>
     </div>
-    <span class="logo-text">You<span>Tube</span></span>
+    <span class="logo-text">View<span>Tube</span></span>
   </a>
 
-  <!-- Search Bar + Voice Search -->
-  <div class="search-container">
-    <div class="search-wrapper" role="search">
-      <label class="visually-hidden" for="search-input">Search videos</label>
-      <input
-        type="search"
-        class="search-input"
-        id="search-input"
-        placeholder="Search videos, channels, categories..."
-        autocomplete="off"
-        aria-label="Search videos"
-      />
-      <button class="search-btn" aria-label="Submit search">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
-             fill="none" stroke="currentColor" stroke-width="2.5"
-             stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-        </svg>
-      </button>
-    </div>
-    <button class="mic-btn" id="voice-search-btn" aria-label="Search with your voice" title="Search with your voice">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="18" height="18">
-        <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
-        <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
+  <!-- Search Bar -->
+  <div class="search-wrapper" role="search">
+    <label class="visually-hidden" for="search-input">Search videos</label>
+    <input
+      type="search"
+      class="search-input"
+      id="search-input"
+      placeholder="Search videos, creators, categories…"
+      autocomplete="off"
+      aria-label="Search videos"
+    />
+    <button class="search-btn" aria-label="Submit search">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+           fill="none" stroke="currentColor" stroke-width="2.5"
+           stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
       </svg>
     </button>
   </div>
@@ -177,48 +169,49 @@
     <!-- Main Navigation -->
     <div class="sidebar-section-title">Explore</div>
 
-    <button class="sidebar-item active" id="sidebar-home" aria-label="Home">
+    <a class="sidebar-item active" href="#feed" aria-label="Home">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
         <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
         <polyline points="9 22 9 12 15 12 15 22"/>
       </svg>
       <span>Home</span>
-    </button>
+    </a>
 
-    <button class="sidebar-item" id="sidebar-shorts" aria-label="Shorts">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z"/>
-        <polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"/>
-      </svg>
-      <span>Shorts</span>
-    </button>
-
-    <button class="sidebar-item" id="sidebar-subscriptions" aria-label="Subscriptions">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+    <a class="sidebar-item" href="#subscriptions" aria-label="Subscriptions">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+        <path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18z"/>
+        <polygon points="10 8 16 12 10 16 10 8"/>
       </svg>
       <span>Subscriptions</span>
-    </button>
+    </a>
 
-    <div class="sidebar-divider" role="separator"></div>
-    <div class="sidebar-section-title">You</div>
-
-    <button class="sidebar-item" id="sidebar-library" aria-label="Library">
+    <a class="sidebar-item" href="#library" aria-label="Library">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
         <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
         <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
       </svg>
       <span>Library</span>
-    </button>
+    </a>
 
-    <button class="sidebar-item" id="sidebar-liked" aria-label="Liked Videos">
+    <div class="sidebar-divider" role="separator"></div>
+    <div class="sidebar-section-title">You</div>
+
+    <a class="sidebar-item" href="#liked" aria-label="Liked Videos">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
         <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
       </svg>
       <span>Liked Videos</span>
-    </button>
+    </a>
 
-    <button class="sidebar-item" id="sidebar-settings" aria-label="Settings">
+    <a class="sidebar-item" href="#channel" aria-label="My Channel">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+        <circle cx="12" cy="7" r="4"/>
+      </svg>
+      <span>My Channel</span>
+    </a>
+
+    <button class="sidebar-item" aria-label="Settings">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
         <circle cx="12" cy="12" r="3"/>
         <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
@@ -232,218 +225,265 @@
   <!-- ── MAIN CONTENT ── -->
   <main class="main-content" id="main-content" role="main">
 
-    <!-- Category Chip Bar -->
-    <nav class="category-bar" id="category-bar" aria-label="Image categories"></nav>
+    <!-- Home View -->
+    <div id="home-view" class="app-view">
+      <nav class="category-bar" id="category-bar" aria-label="Video categories"></nav>
+      <h2 class="section-title">Trending Videos</h2>
+      <div class="video-grid" id="video-grid" aria-label="Video feed" aria-live="polite"></div>
+    </div>
 
-    <!-- Section heading -->
-    <h2 class="section-title" id="section-title">Discover Videos</h2>
+    <!-- Watch View -->
+    <div id="watch-view" class="app-view" style="display: none;">
+      <div class="watch-layout">
+        <!-- Left side: Player and info -->
+        <div class="watch-main">
+          <!-- Custom Video Player Wrapper -->
+          <div class="video-player-container" id="video-player-container">
+            <!-- Video Player Background Glow (Ambient Mode) -->
+            <div class="ambient-glow" id="ambient-glow"></div>
+            
+            <video id="main-video" src="" preload="metadata" playsinline></video>
+            
+            <!-- Click-to-toggle play overlay -->
+            <div class="video-click-overlay" id="video-click-overlay">
+              <div class="video-center-icon" id="video-center-icon">
+                <svg viewBox="0 0 24 24" width="48" height="48"><path fill="currentColor" d="M8 5v14l11-7z"/></svg>
+              </div>
+            </div>
 
-    <!-- Image Grid — populated dynamically by app.js -->
-    <div class="image-grid" id="image-grid" aria-label="Image feed" aria-live="polite"></div>
+            <!-- Custom controls overlay -->
+            <div class="video-controls" id="video-controls">
+              <!-- Progress Bar -->
+              <div class="progress-bar-container" id="progress-container">
+                <div class="progress-bar-hover" id="progress-hover"></div>
+                <div class="progress-bar-buffered" id="progress-buffered"></div>
+                <div class="progress-bar-current" id="progress-current"></div>
+                <div class="progress-bar-scrubber" id="progress-scrubber"></div>
+              </div>
+              
+              <div class="controls-row">
+                <div class="controls-left">
+                  <!-- Play / Pause -->
+                  <button class="player-btn" id="player-play-btn" aria-label="Play">
+                    <svg class="play-icon" viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M8 5v14l11-7z"/></svg>
+                    <svg class="pause-icon" viewBox="0 0 24 24" width="20" height="20" style="display: none;"><path fill="currentColor" d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+                  </button>
+                  
+                  <!-- Volume -->
+                  <div class="volume-container">
+                    <button class="player-btn" id="player-mute-btn" aria-label="Mute">
+                      <svg class="volume-high-icon" viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+                      <svg class="volume-mute-icon" viewBox="0 0 24 24" width="20" height="20" style="display: none;"><path fill="currentColor" d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.21.05-.42.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/></svg>
+                    </button>
+                    <input type="range" class="volume-slider" id="volume-slider" min="0" max="1" step="0.05" value="1" aria-label="Volume slider" />
+                  </div>
+                  
+                  <!-- Time Display -->
+                  <div class="time-display">
+                    <span id="current-time">0:00</span> / <span id="duration-time">0:00</span>
+                  </div>
+                </div>
+                
+                <div class="controls-right">
+                  <!-- Playback Speed -->
+                  <div class="speed-container">
+                    <button class="player-btn" id="player-speed-btn" aria-label="Playback speed" style="font-size: 0.85rem; font-weight: 600; width: auto; padding: 0 0.5rem;">
+                      1.0x
+                    </button>
+                    <div class="speed-dropdown" id="speed-dropdown">
+                      <button data-speed="0.5">0.5x</button>
+                      <button data-speed="0.75">0.75x</button>
+                      <button data-speed="1" class="active">Normal</button>
+                      <button data-speed="1.25">1.25x</button>
+                      <button data-speed="1.5">1.5x</button>
+                      <button data-speed="2">2x</button>
+                    </div>
+                  </div>
+
+                  <!-- Theater Mode -->
+                  <button class="player-btn" id="theater-btn" aria-label="Theater mode">
+                    <svg class="theater-icon" viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M19 6H5c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 10H5V8h14v8z"/></svg>
+                  </button>
+                  
+                  <!-- Fullscreen -->
+                  <button class="player-btn" id="fullscreen-btn" aria-label="Fullscreen">
+                    <svg class="fullscreen-enter-icon" viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>
+                    <svg class="fullscreen-exit-icon" viewBox="0 0 24 24" width="20" height="20" style="display: none;"><path fill="currentColor" d="M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z"/></svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Video Details -->
+          <h1 class="video-title" id="video-title">Video Title</h1>
+          
+          <div class="video-metadata-row">
+            <div class="channel-info-container">
+              <a href="#" class="channel-link" id="video-channel-link">
+                <img class="channel-avatar" id="video-channel-avatar" src="" alt="Channel Avatar" />
+                <div class="channel-meta">
+                  <span class="channel-name" id="video-channel-name">Channel Name</span>
+                  <span class="sub-count" id="video-sub-count">1.2M subscribers</span>
+                </div>
+              </a>
+              <button class="subscribe-btn" id="subscribe-btn">Subscribe</button>
+            </div>
+            
+            <div class="video-actions">
+              <button class="action-btn" id="video-like-btn">
+                <svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M1 21h4V9H1v12zm22-11c0-1.1-.9-2-2-2h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L14.17 1 7.59 7.59C7.22 7.95 7 8.45 7 9v10c0 1.1.9 2 2 2h9c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-2z"/></svg>
+                <span id="video-likes">0</span>
+              </button>
+              <button class="action-btn" id="video-dislike-btn">
+                <svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M19 15h4V3h-4v12zm-4 7c1.1 0 2-.9 2-2V10c0-.83-.5-1.54-1.22-1.84L12.73 1.1c-.22-.09-.46-.1-.68-.1H12c-.55 0-1 .45-1 1v1l.91 4.57L5.59 13.06C5.22 13.41 5 13.91 5 14.47v5.53c0 1.1.9 2 2 2h8.31l-.31 1.57-.03.32c0 .41.17.79.44 1.06l1.2 1.2z"/></svg>
+              </button>
+              <button class="action-btn" id="video-share-btn">
+                <svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/></svg>
+                Share
+              </button>
+              <button class="action-btn" id="video-watch-later-btn">
+                <svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67V7z"/></svg>
+                Watch Later
+              </button>
+            </div>
+          </div>
+          
+          <!-- Collapsible Description Box -->
+          <div class="video-description-box" id="description-box">
+            <div class="description-meta">
+              <span class="views-count" id="video-views-count">142,392 views</span>
+              <span class="upload-date" id="video-upload-date">Jun 30, 2026</span>
+              <span class="category-tag" id="video-category-tag">Nature</span>
+            </div>
+            <p class="description-text" id="video-description-text">Description goes here...</p>
+            <button class="description-toggle" id="description-toggle">Show more</button>
+          </div>
+          
+          <!-- Comments Area -->
+          <div class="watch-comments">
+            <div class="comments-header">
+              <span class="comments-count" id="comments-count">2 comments</span>
+              <div class="sort-container">
+                <button class="sort-btn" id="sort-btn">
+                  <svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M3 18h6v-2H3v2zM3 5v2h18V5H3zm0 7h12v-2H3v2z"/></svg>
+                  Sort by
+                </button>
+                <div class="sort-dropdown" id="sort-dropdown">
+                  <button data-sort="top" class="active">Top comments</button>
+                  <button data-sort="newest">Newest first</button>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Comment Input -->
+            <div class="comment-input-row">
+              <img class="user-avatar" id="comment-user-avatar" src="https://api.dicebear.com/7.x/avataaars/svg?seed=guest" alt="Your avatar" />
+              <div class="comment-input-wrapper">
+                <textarea id="comment-input-textarea" placeholder="Add a comment..." rows="1"></textarea>
+                <div class="comment-buttons" id="comment-buttons" style="display: none;">
+                  <button class="cancel-btn" id="comment-cancel">Cancel</button>
+                  <button class="submit-btn" id="comment-submit-btn" disabled>Comment</button>
+                </div>
+              </div>
+            </div>
+            
+            <div class="comments-list" id="watch-comments-list"></div>
+          </div>
+        </div>
+        
+        <!-- Right side: Sidebar Recommendations -->
+        <div class="watch-sidebar">
+          <h3 class="recommendations-title">Up next</h3>
+          <div class="recommended-videos-list" id="recommended-videos"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Channel View -->
+    <div id="channel-view" class="app-view" style="display: none;">
+      <div class="channel-banner-container">
+        <img class="channel-banner" id="channel-banner" src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=1200&q=80" alt="Channel Banner" />
+      </div>
+      <div class="channel-header-info">
+        <img class="channel-header-avatar" id="channel-header-avatar" src="" alt="Channel Avatar" />
+        <div class="channel-header-details">
+          <h1 class="channel-header-name" id="channel-header-name">Channel Name</h1>
+          <p class="channel-header-meta">
+            <span class="channel-username" id="channel-header-handle">@creator</span>
+            <span class="dot">•</span>
+            <span class="channel-subs" id="channel-header-subs">1.2M subscribers</span>
+            <span class="dot">•</span>
+            <span class="channel-video-count" id="channel-header-video-count">12 videos</span>
+          </p>
+          <p class="channel-header-desc" id="channel-header-desc">Channel description details go here...</p>
+          <button class="channel-subscribe-btn subscribe-btn" id="channel-page-subscribe-btn">Subscribe</button>
+        </div>
+      </div>
+      
+      <!-- Channel Navigation Tabs -->
+      <div class="channel-tabs">
+        <button class="tab-item active" data-tab="videos">Videos</button>
+        <button class="tab-item" data-tab="about">About</button>
+      </div>
+      
+      <div class="channel-tab-content">
+        <!-- Videos Tab -->
+        <div class="tab-panel" id="channel-panel-videos">
+          <div class="video-grid" id="channel-videos-grid"></div>
+        </div>
+        <!-- About Tab -->
+        <div class="tab-panel" id="channel-panel-about" style="display: none;">
+          <div class="channel-about-info">
+            <h3>Description</h3>
+            <p id="channel-about-desc">No description available.</p>
+            <h3 style="margin-top: 1.5rem;">Stats</h3>
+            <p>Joined: Jun 12, 2024</p>
+            <p id="channel-about-views">Total Views: 2.4M views</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Subscriptions View -->
+    <div id="subscriptions-view" class="app-view" style="display: none;">
+      <h2 class="section-title">Subscriptions Feed</h2>
+      <div class="video-grid" id="subscriptions-grid" aria-live="polite"></div>
+    </div>
+
+    <!-- Liked Videos View -->
+    <div id="liked-view" class="app-view" style="display: none;">
+      <h2 class="section-title">Liked Videos</h2>
+      <div class="video-grid" id="liked-grid" aria-live="polite"></div>
+    </div>
+
+    <!-- Library View -->
+    <div id="library-view" class="app-view" style="display: none;">
+      <div class="library-section" style="margin-bottom: 2rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+          <h2 class="section-title" style="margin-bottom: 0;">History</h2>
+          <button id="clear-history-btn" class="action-btn" style="font-size: 0.8rem; padding: 0.35rem 0.75rem; border: 1px solid var(--border-strong); border-radius: 99px;">Clear All History</button>
+        </div>
+        <div class="video-grid" id="history-grid" aria-live="polite"></div>
+      </div>
+      <div class="library-section">
+        <h2 class="section-title">Watch Later</h2>
+        <div class="video-grid" id="watch-later-grid" aria-live="polite"></div>
+      </div>
+    </div>
 
   </main>
 
 </div><!-- /page-layout -->
 
-
 <!-- Mobile sidebar overlay (dark backdrop) -->
 <div class="sidebar-overlay" id="sidebar-overlay" aria-hidden="true"></div>
-
-
-<!-- ════════════════════════════════════════════════════════════
-     IMAGE DETAIL MODAL
-     Hidden by default; opened when user clicks an image card.
-     ════════════════════════════════════════════════════════════ -->
-<div class="modal-backdrop" id="detail-modal" role="dialog" aria-modal="true"
-     aria-labelledby="modal-title" aria-hidden="true">
-
-  <div class="modal" id="detail-modal-inner">
-    <!-- Close button -->
-    <button class="modal-close" id="close-detail-modal" aria-label="Close video detail">
-      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
-           fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-      </svg>
-    </button>
-
-    <!-- Two-column layout: video | details -->
-    <div class="modal-layout">
-
-      <!-- Left: Custom Video Player Container -->
-      <div class="modal-image-pane">
-        <div class="video-container" id="video-container">
-          <video id="modal-video" src="" playsinline preload="auto"></video>
-          
-          <!-- Large center play indicator -->
-          <div class="large-play-overlay" id="large-play-overlay">
-            <svg viewBox="0 0 24 24" fill="currentColor" width="48" height="48">
-              <path d="M8 5v14l11-7z"/>
-            </svg>
-          </div>
-
-          <!-- Custom Controls overlay -->
-          <div class="video-controls" id="video-controls">
-            <!-- Progress Bar -->
-            <div class="progress-bar-container" id="progress-container">
-              <div class="progress-bar-hover-line"></div>
-              <div class="progress-bar-buffered" id="progress-buffered"></div>
-              <div class="progress-bar-elapsed" id="progress-elapsed"></div>
-              <div class="progress-bar-scrubber" id="progress-scrubber"></div>
-            </div>
-            <!-- Control buttons -->
-            <div class="controls-row">
-              <div class="controls-left">
-                <button class="player-control-btn" id="play-pause-btn" aria-label="Play">
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="20" height="20" id="play-icon">
-                    <path d="M8 5v14l11-7z"/>
-                  </svg>
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="20" height="20" id="pause-icon" style="display:none">
-                    <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
-                  </svg>
-                </button>
-                <div class="volume-container">
-                  <button class="player-control-btn" id="mute-btn" aria-label="Mute">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="18" height="18" id="volume-icon">
-                      <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
-                      <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/>
-                    </svg>
-                  </button>
-                  <input type="range" class="volume-slider" id="volume-slider" min="0" max="1" step="0.05" value="1" aria-label="Volume" />
-                </div>
-                <div class="time-display">
-                  <span id="time-current">0:00</span> / <span id="time-duration">0:00</span>
-                </div>
-              </div>
-              <div class="controls-right">
-                <div class="speed-container">
-                  <button class="player-control-btn" id="speed-btn" aria-label="Playback Speed">1.0x</button>
-                  <div class="speed-menu" id="speed-menu">
-                    <button class="speed-option" data-speed="0.5">0.5x</button>
-                    <button class="speed-option active" data-speed="1.0">Normal</button>
-                    <button class="speed-option" data-speed="1.5">1.5x</button>
-                    <button class="speed-option" data-speed="2.0">2.0x</button>
-                  </div>
-                </div>
-                <button class="player-control-btn" id="theater-btn" aria-label="Theater Mode" title="Theater Mode">
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
-                    <rect x="2" y="4" width="20" height="16" rx="2" ry="2"/>
-                  </svg>
-                </button>
-                <button class="player-control-btn" id="fullscreen-btn" aria-label="Fullscreen" title="Fullscreen">
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="18" height="18">
-                    <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
-                  </svg>
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Right: Details + Interactions + Comments -->
-      <div class="modal-details-pane">
-
-        <!-- Category tag -->
-        <span class="modal-category-tag" id="modal-category-tag"></span>
-
-        <!-- Title -->
-        <h2 class="modal-title" id="modal-title"></h2>
-
-        <!-- Uploader info & Subscribe button -->
-        <div class="modal-uploader-row">
-          <div class="modal-uploader">
-            <div class="modal-uploader-avatar">
-              <img id="modal-uploader-avatar" src="" alt="" loading="lazy" />
-            </div>
-            <div>
-              <p class="modal-uploader-name" id="modal-uploader-name"></p>
-              <p class="modal-uploader-sub" id="modal-uploader-subs">Loading subscribers...</p>
-            </div>
-          </div>
-          <button class="subscribe-btn" id="subscribe-btn">Subscribe</button>
-        </div>
-
-        <!-- Description -->
-        <p class="modal-description" id="modal-description"></p>
-
-        <!-- Stats -->
-        <div class="modal-stats">
-          <span id="modal-views"></span>
-          <span>•</span>
-          <span id="modal-time"></span>
-        </div>
-
-        <!-- ── Interaction Panel ── -->
-        <div class="interaction-panel">
-
-          <!-- Like Button -->
-          <button class="action-btn like-btn" id="like-btn" aria-label="Like this image" aria-pressed="false">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
-                 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
-            </svg>
-            <span id="like-count">0</span>
-          </button>
-
-          <!-- Share Button -->
-          <button class="action-btn" id="share-btn" aria-label="Share this image">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
-                 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="18" cy="5" r="3"/>
-              <circle cx="6" cy="12" r="3"/>
-              <circle cx="18" cy="19" r="3"/>
-              <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>
-              <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
-            </svg>
-            Share
-          </button>
-
-          <!-- Download Button -->
-          <button class="action-btn" id="download-btn" aria-label="Download this image">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
-                 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-              <polyline points="7 10 12 15 17 10"/>
-              <line x1="12" y1="15" x2="12" y2="3"/>
-            </svg>
-            Download
-          </button>
-
-        </div><!-- /interaction-panel -->
-
-        <!-- ── Comments Section ── -->
-        <div class="comments-section">
-          <h3 class="comments-title">Comments</h3>
-
-          <!-- Comment input -->
-          <div class="comment-input-row">
-            <textarea
-              class="comment-input"
-              id="comment-input"
-              placeholder="Add a comment…"
-              rows="1"
-              aria-label="Write a comment"
-            ></textarea>
-            <button class="comment-submit-btn" id="comment-submit" aria-label="Post comment">
-              Post
-            </button>
-          </div>
-
-          <!-- Comments list — populated by app.js -->
-          <div class="comments-list" id="comments-list" aria-live="polite"></div>
-        </div>
-
-      </div><!-- /modal-details-pane -->
-    </div><!-- /modal-layout -->
-  </div><!-- /modal -->
-</div><!-- /detail-modal -->
-
 
 <!-- ════════════════════════════════════════════════════════════
      UPLOAD MODAL
      ════════════════════════════════════════════════════════════ -->
-<div class="modal-backdrop upload-modal" id="upload-modal" role="dialog" aria-modal="true" aria-labelledby="upload-title-heading" aria-hidden="true">
-  <div class="modal">
+<div class="modal-backdrop" id="upload-modal" role="dialog" aria-modal="true" aria-labelledby="upload-modal-title" aria-hidden="true">
+  <div class="modal" id="upload-modal-inner">
     <!-- Close button -->
     <button class="modal-close" id="close-upload-modal" aria-label="Close upload modal">
       <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
@@ -452,64 +492,65 @@
       </svg>
     </button>
 
-    <div class="upload-modal-header">
-      <h2 class="upload-modal-title" id="upload-title-heading">Upload Video</h2>
-    </div>
-    
-    <form class="upload-form" id="upload-form">
-      <div class="drop-zone" id="drop-zone" tabindex="0">
-        <div id="drop-content">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="40" height="40">
-            <polyline points="16 16 12 12 8 16"/>
-            <line x1="12" y1="12" x2="12" y2="21"/>
-            <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/>
-            <line x1="12" y1="12" x2="12" y2="3"/>
-          </svg>
-          <p>Drag & drop video file or <span>browse</span></p>
+    <div class="upload-modal-content">
+      <h2 id="upload-modal-title" style="margin-bottom: 1.25rem; font-family: var(--font-display);">Upload Video</h2>
+      <form id="upload-form" class="login-form">
+        <!-- Drag & Drop Zone -->
+        <div class="drop-zone" id="drop-zone" tabindex="0">
+          <div id="drop-content">
+            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24"
+                 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                 style="margin: 0 auto 0.75rem; color: var(--accent); opacity: 0.85;">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="17 8 12 3 7 8"/>
+              <line x1="12" y1="3" x2="12" y2="15"/>
+            </svg>
+            <p style="font-weight: 500; font-size: 0.9rem;">Drag and drop file to upload</p>
+            <p class="text-xs text-muted" style="margin-top: 0.25rem;">(or click to browse local files)</p>
+          </div>
+          <img id="drop-preview" style="display: none; width: 100%; height: 160px; object-fit: cover; border-radius: var(--radius-sm);" alt="Upload preview" />
+          <input type="file" id="file-input" accept="video/*" style="display: none;" />
         </div>
-        <img class="drop-zone-preview" id="drop-preview" src="" alt="Video Preview" />
-      </div>
-      <input type="file" id="file-input" accept="video/*,image/*" />
 
-      <div class="upload-field">
-        <label for="upload-title">Title</label>
-        <input type="text" id="upload-title" placeholder="Add a title that describes your video" required />
-      </div>
+        <div class="field-group">
+          <label for="upload-title">Title *</label>
+          <div class="input-wrapper">
+            <input type="text" id="upload-title" required placeholder="Name your video..." />
+          </div>
+        </div>
 
-      <div class="upload-field">
-        <label for="upload-category">Category</label>
-        <select id="upload-category" required>
-          <option value="">Select Category</option>
-          <option value="Music">Music</option>
-          <option value="Gaming">Gaming</option>
-          <option value="Tech">Tech</option>
-          <option value="Animals">Animals</option>
-          <option value="Abstract">Abstract</option>
-          <option value="Minimalism">Minimalism</option>
-        </select>
-      </div>
+        <div class="field-group">
+          <label for="upload-category">Category *</label>
+          <div class="input-wrapper">
+            <select id="upload-category" required style="width: 100%; padding: 0.65rem 1rem; border: 1.5px solid var(--input-border); border-radius: var(--radius); background: var(--input-bg); color: var(--text-primary);">
+              <option value="Music">Music</option>
+              <option value="Gaming">Gaming</option>
+              <option value="Technology">Technology</option>
+              <option value="Nature">Nature</option>
+              <option value="Cooking">Cooking</option>
+              <option value="Animals">Animals</option>
+            </select>
+          </div>
+          <button class="subscribe-btn" id="subscribe-btn">Subscribe</button>
+        </div>
 
-      <div class="upload-field">
-        <label for="upload-desc">Description</label>
-        <textarea id="upload-desc" placeholder="Tell viewers about your video" rows="3"></textarea>
-      </div>
+        <div class="field-group">
+          <label for="upload-desc">Description</label>
+          <div class="input-wrapper">
+            <textarea id="upload-desc" rows="3" placeholder="Tell viewers about your video..." style="width: 100%; padding: 0.65rem 1rem; border: 1.5px solid var(--input-border); border-radius: var(--radius); background: var(--input-bg); color: var(--text-primary); font-family: inherit; resize: vertical; outline: none;"></textarea>
+          </div>
+        </div>
 
-      <button type="submit" class="upload-submit-btn">Publish</button>
-    </form>
-  </div>
-</div>
+        <div class="field-group">
+          <label for="upload-url">Mock Video URL (Optional)</label>
+          <div class="input-wrapper">
+            <input type="text" id="upload-url" placeholder="e.g. http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" />
+          </div>
+        </div>
 
-<!-- Voice Search Overlay -->
-<div class="voice-overlay" id="voice-overlay" aria-hidden="true">
-  <div class="voice-overlay-content">
-    <div class="pulse-ring">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="32" height="32">
-        <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
-        <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
-      </svg>
+        <button type="submit" class="login-btn" id="upload-submit-btn">Publish Video</button>
+      </form>
     </div>
-    <p class="voice-status" id="voice-status">Listening...</p>
-    <button class="voice-close-btn" id="voice-close-btn">&times;</button>
   </div>
 </div>
 
