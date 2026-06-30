@@ -1,5 +1,5 @@
 /**
- * auth.js — PicTube Authentication Logic
+ * auth.js — YouTube Authentication Logic
  * ----------------------------------------
  * Handles all login-related behavior:
  *   - Front-end form validation (email format, password length)
@@ -14,7 +14,7 @@
 //    If the user isn't logged in, redirect them to login.html
 // ─────────────────────────────────────────────
 function requireAuth() {
-  const user = sessionStorage.getItem("pictube_user");
+  const user = sessionStorage.getItem("youtube_user");
   if (!user) {
     // Not logged in — send to login page
     window.location.href = "login.html";
@@ -25,7 +25,7 @@ function requireAuth() {
 // 2. GET CURRENT USER — returns the stored user object or null
 // ─────────────────────────────────────────────
 function getCurrentUser() {
-  const raw = sessionStorage.getItem("pictube_user");
+  const raw = sessionStorage.getItem("youtube_user");
   return raw ? JSON.parse(raw) : null;
 }
 
@@ -33,7 +33,7 @@ function getCurrentUser() {
 // 3. LOGOUT — clears the session and redirects to login
 // ─────────────────────────────────────────────
 function logout() {
-  sessionStorage.removeItem("pictube_user");
+  sessionStorage.removeItem("youtube_user");
   window.location.href = "login.html";
 }
 
@@ -148,7 +148,7 @@ function handleLoginSubmit(e) {
     };
 
     // Save to sessionStorage (cleared when the browser tab is closed)
-    sessionStorage.setItem("pictube_user", JSON.stringify(mockUser));
+    sessionStorage.setItem("youtube_user", JSON.stringify(mockUser));
 
     // Show success toast, then redirect
     showAuthToast("Login successful! Redirecting…", "success");
@@ -193,7 +193,7 @@ function togglePasswordVisibility() {
 // ─────────────────────────────────────────────
 document.addEventListener("DOMContentLoaded", () => {
   // If the user is already logged in, skip the login page
-  if (sessionStorage.getItem("pictube_user")) {
+  if (sessionStorage.getItem("youtube_user")) {
     window.location.href = "index.html";
     return;
   }

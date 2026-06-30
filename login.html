@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>PicTube — Sign In</title>
+  <title>YouTube — Sign In</title>
 
   <!-- Google Font: Inter for clean, modern typography -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -18,9 +18,9 @@
     :root {
       --bg-gradient-start: #0f0c1a;
       --bg-gradient-end:   #1a1035;
-      --accent:            #e63950;   /* crimson red — PicTube brand */
-      --accent-hover:      #ff4d6a;
-      --accent-glow:       rgba(230, 57, 80, 0.35);
+      --accent:            #ff0000;   /* YouTube Red */
+      --accent-hover:      #cc0000;
+      --accent-glow:       rgba(255, 0, 0, 0.35);
       --glass-bg:          rgba(255, 255, 255, 0.06);
       --glass-border:      rgba(255, 255, 255, 0.12);
       --text-primary:      #f0f0f5;
@@ -61,7 +61,7 @@
     }
     body::before {
       width: 400px; height: 400px;
-      background: radial-gradient(circle, #e63950, transparent 70%);
+      background: radial-gradient(circle, #ff0000, transparent 70%);
       top: -80px; left: -80px;
       animation: floatOrb 8s ease-in-out infinite;
     }
@@ -312,16 +312,15 @@
 
     <!-- Brand Logo -->
     <div class="brand">
-      <div class="brand-icon" aria-hidden="true">
-        <!-- Camera / play icon -->
+      <div class="brand-icon" aria-hidden="true" style="background:#ff0000">
+        <!-- Play icon -->
         <svg width="22" height="22" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-          <path d="M23 7L16 12L23 17V7Z"/>
-          <rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
+          <path d="M8 5v14l11-7z"/>
         </svg>
       </div>
-      <span class="brand-name">Pic<span>Tube</span></span>
+      <span class="brand-name">You<span>Tube</span></span>
     </div>
-    <p class="login-subtitle">Sign in to explore, share, and discover stunning images.</p>
+    <p class="login-subtitle">Sign in to explore, share, and discover stunning videos.</p>
 
     <!-- Login Form -->
     <!-- The id="login-form" is hooked in auth.js via addEventListener -->
@@ -392,7 +391,7 @@
 
       <!-- Sign Up Prompt -->
       <p class="signup-prompt">
-        New to PicTube?
+        New to YouTube?
         <a href="#" onclick="return false;">Create an account</a>
       </p>
 
