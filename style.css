@@ -480,10 +480,9 @@ h3 { font-size: 1.1rem; }
    ─────────────────────────────────────────────────────────────── */
 
 .sidebar {
-  position: fixed;
+  position: sticky;
   top: var(--header-height);
-  left: 0;
-  bottom: 0;
+  height: calc(100vh - var(--header-height));
   width: var(--sidebar-width);
   background: var(--bg-surface);
   border-right: 1px solid var(--border);
@@ -1375,6 +1374,10 @@ h3 { font-size: 1.1rem; }
 
   /* On mobile: sidebar is hidden off-screen (slides in from left) */
   .sidebar {
+    position: fixed;
+    top: var(--header-height);
+    bottom: 0;
+    height: auto;
     width: var(--sidebar-width); /* restore full width */
     transform: translateX(-100%);
   }
