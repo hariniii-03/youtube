@@ -1405,7 +1405,7 @@ function initUploadModal() {
 function hydrateUserUI() {
   let user = { username: "Guest", email: "guest@viewtube.com", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=guest" };
   try {
-    const stored = sessionStorage.getItem("pictube_user");
+    const stored = sessionStorage.getItem("youtube_user");
     if (stored) user = JSON.parse(stored);
   } catch (_) {}
 
@@ -1566,7 +1566,7 @@ document.addEventListener("DOMContentLoaded", () => {
   setTimeout(() => {
     let name = "there";
     try {
-      const user = JSON.parse(sessionStorage.getItem("pictube_user") || "{}");
+      const user = JSON.parse(sessionStorage.getItem("youtube_user") || "{}");
       name = user.username || "there";
     } catch (_) {}
     showToast(`Welcome to ViewTube, ${name}! 🎬`, "success", 2500);
