@@ -1,0 +1,358 @@
+<div class="app-container">
+  <!-- Top Navigation Header -->
+  <header class="app-header">
+    <div class="header-content">
+      <div class="logo-section">
+        <span class="logo-icon">🎯</span>
+        <div>
+          <h1>CareerMatch</h1>
+          <p class="subtitle">Explainable Job Matching Engine for Students</p>
+        </div>
+      </div>
+      <div class="status-indicator" *ngIf="activeStudent">
+        <span class="pulse-dot"></span>
+        Active Profile: <strong>{{ activeStudent.name }}</strong>
+      </div>
+    </div>
+  </header>
+
+  <!-- Notification Banner -->
+  <div class="alert-container">
+    <div class="alert alert-success animate-fade" *ngIf="successMessage">
+      <span class="alert-icon">✓</span>
+      <span class="alert-text">{{ successMessage }}</span>
+    </div>
+    <div class="alert alert-error animate-fade" *ngIf="errorMessage">
+      <span class="alert-icon">⚠</span>
+      <span class="alert-text">{{ errorMessage }}</span>
+    </div>
+  </div>
+
+  <!-- Main Grid Dashboard -->
+  <main class="dashboard-grid">
+    
+    <!-- LEFT PANEL: Student Profile Config -->
+    <section class="profile-panel card">
+      <div class="card-header">
+        <span class="header-icon">👤</span>
+        <h2>My Profile</h2>
+      </div>
+      
+      <form [formGroup].="profileForm" (ngSubmit)="onSubmitProfile()" class="profile-form">
+        <!-- Name -->
+        <div class="form-group">
+          <label for="name">Full Name <span class="required">*</span></label>
+          <input 
+            type="text" 
+            id="name" 
+            formControlName="name" 
+            placeholder="John Doe" 
+            [class.error-input]="profileForm.get('name')?.invalid && profileForm.get('name')?.touched"
+          />
+          <span class="field-error" *ngIf="profileForm.get('name')?.invalid && profileForm.get('name')?.touched">
+            Name is required (min 2 chars).
+          </span>
+        </div>
+
+        <!-- Email -->
+        <div class="form-group">
+          <label for="email">Email Address <span class="required">*</span></label>
+          <input 
+            type="email" 
+            id="email" 
+            formControlName="email" 
+            placeholder="john.doe@university.edu" 
+            [class.error-input]="profileForm.get('email')?.invalid && profileForm.get('email')?.touched"
+          />
+          <span class="field-error" *ngIf="profileForm.get('email')?.invalid && profileForm.get('email')?.touched">
+            Please enter a valid email address.
+          </span>
+        </div>
+
+        <!-- GPA -->
+        <div class="form-group">
+          <label for="gpa">Cumulative GPA <span class="required">*</span></label>
+          <div class="input-helper-container">
+            <input 
+              type="number" 
+              id="gpa" 
+              step="0.01" 
+              formControlName="gpa" 
+              placeholder="3.50" 
+              [class.error-input]="profileForm.get('gpa')?.invalid && profileForm.get('gpa')?.touched"
+            />
+            <span class="gpa-range">/ 4.0</span>
+          </div>
+          <span class="field-error" *ngIf="profileForm.get('gpa')?.invalid && profileForm.get('gpa')?.touched">
+            GPA is required and must be between 0.0 and 4.0.
+          </span>
+        </div>
+
+        <!-- Visa Sponsorship Toggle -->
+        <div class="form-group">
+          <label>Work Authorization Status <span class="required">*</span></label>
+          <div class="radio-toggle">
+            <label class="toggle-option" [class.active]="!profileForm.value.visaRequired">
+              <input type="radio" [value]="false" formControlName="visaRequired" />
+              <span>Citizen / Permanent Resident</span>
+            </label>
+            <label class="toggle-option" [class.active]="profileForm.value.visaRequired">
+              <input type="radio" [value]="true" formControlName="visaRequired" />
+              <span>Requires Visa Sponsorship</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Skills Section -->
+        <div class="form-group">
+          <label>Skills & Expertise</label>
+          <p class="field-desc">Type a skill and press Enter, or choose from suggestions below.</p>
+          
+          <div class="skills-input-wrapper">
+            <input 
+              type="text" 
+              placeholder="Add skill (e.g. Angular, AWS)"
+              [(ngModel)]="currentSkillInput" 
+              [ngModelOptions]="{standalone: true}"
+              (keydown)="onSkillKeydown($event)"
+            />
+            <button type="button" class="btn-add-tag" (click)="addSkill(currentSkillInput)">Add</button>
+          </div>
+
+          <!-- Active Skills Tags -->
+          <div class="skills-tags-container">
+            <div class="skill-tag" *ngFor="let skill of skillsList">
+              <span>{{ skill }}</span>
+              <button type="button" class="btn-remove-tag" (click)="removeSkill(skill)">&times;</button>
+            </div>
+            <div class="no-skills-msg" *ngIf="skillsList.length === 0">
+              No skills added yet. Add skills to match with postings!
+            </div>
+          </div>
+
+          <!-- Popular Skills Suggestions -->
+          <div class="popular-suggestions">
+            <span class="suggestions-label">Suggestions:</span>
+            <button 
+              type="button" 
+              class="suggestion-pill" 
+              *ngFor="let skill of popularSkills" 
+              (click)="addSkill(skill)"
+              [disabled]="skillsList.includes(skill)"
+            >
+              + {{ skill }}
+            </button>
+          </div>
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit" class="btn-primary-gradient btn-block">
+          <span>{{ activeStudent ? 'Update Profile & Match' : 'Save Profile & Calculate Matches' }}</span>
+        </button>
+      </form>
+    </section>
+
+    <!-- RIGHT PANEL: Job Match Listings -->
+    <section class="listings-panel">
+      <!-- Listings Filters Toolbar -->
+      <div class="filters-card card">
+        <div class="filters-grid">
+          <!-- Search Location -->
+          <div class="filter-control">
+            <label for="searchLoc">Location</label>
+            <input 
+              type="text" 
+              id="searchLoc" 
+              placeholder="e.g. Remote, San Francisco" 
+              [(ngModel)]="searchLocation" 
+            />
+          </div>
+
+          <!-- Work Mode Select -->
+          <div class="filter-control">
+            <label for="workModeFilter">Work Mode</label>
+            <select id="workModeFilter" [(ngModel)]="filterWorkMode">
+              <option value="ALL">All Modes</option>
+              <option value="REMOTE">Remote</option>
+              <option value="HYBRID">Hybrid</option>
+              <option value="ONSITE">On-Site</option>
+            </select>
+          </div>
+
+          <!-- Visa Filter -->
+          <div class="filter-control">
+            <label for="visaFilter">Sponsorship</label>
+            <select id="visaFilter" [(ngModel)]="filterSponsorship">
+              <option value="ALL">Any Sponsorship</option>
+              <option value="SPONSOR_ONLY">Sponsorship Friendly</option>
+            </select>
+          </div>
+
+          <!-- Sorting Selector -->
+          <div class="filter-control">
+            <label for="sortSelector">Sort By</label>
+            <select id="sortSelector" [(ngModel)]="sortBy">
+              <option value="SCORE" [disabled]="!activeStudent">Match Score (Desc)</option>
+              <option value="TITLE">Job Title</option>
+              <option value="COMPANY">Company</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Tabs Toolbar -->
+        <div class="listings-tabs-toolbar">
+          <div class="tabs-group">
+            <button 
+              class="tab-btn" 
+              [class.active]="!showAppliedOnly" 
+              (click)="showAppliedOnly = false"
+            >
+              All Roles ({{ filteredListings.length }})
+            </button>
+            <button 
+              class="tab-btn" 
+              [class.active]="showAppliedOnly" 
+              (click)="showAppliedOnly = true"
+              [disabled]="!activeStudent"
+            >
+              My Applied Tracking
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Instruction banner if no student profile loaded -->
+      <div class="setup-notice animate-fade" *ngIf="!activeStudent">
+        <span class="notice-icon">💡</span>
+        <div>
+          <h3>Showing Generic Job Openings</h3>
+          <p>Complete and save your profile on the left to activate the <strong>Explainable Matching Engine</strong> and calculate custom suitability scores.</p>
+        </div>
+      </div>
+
+      <!-- Listings Cards List -->
+      <div class="listings-container" *ngIf="filteredListings.length > 0">
+        
+        <!-- Angular template loop -->
+        <div 
+          class="job-card card hover-lift animate-slide-in" 
+          *ngFor="let item of filteredListings"
+        >
+          <!-- Score Badge (for logged-in student matches) -->
+          <ng-container *ngIf="activeStudent; else noScoreTemplate">
+            <!-- Destructuring response context -->
+            <div class="card-matching-indicator">
+              <div class="score-badge" [ngClass]="getScoreBadgeClass(item.matchScore)">
+                <span class="score-num">{{ item.matchScore | matchScore }}</span>
+                
+                <!-- HOVER TOOLTIP BREAKDOWN -->
+                <div class="match-tooltip">
+                  <div class="tooltip-header">
+                    <h4>Suitability Score Breakdown</h4>
+                    <span class="final-percentage">{{ item.matchScore }}% match</span>
+                  </div>
+                  <ul class="tooltip-list">
+                    <li *ngFor="let reason of item.matchExplanation">
+                      {{ reason }}
+                    </li>
+                  </ul>
+                  <p class="tooltip-footer">Hover details generated by Matching Engine</p>
+                </div>
+              </div>
+            </div>
+          </ng-container>
+
+          <ng-template #noScoreTemplate>
+            <div class="card-matching-indicator">
+              <span class="no-score-badge">Fill profile to match</span>
+            </div>
+          </ng-template>
+
+          <!-- Job Listing Core Fields -->
+          <div class="job-body">
+            <div class="job-main-details">
+              <span class="company-name">{{ item.job.company }}</span>
+              <h3 class="job-title">{{ item.job.title }}</h3>
+              
+              <div class="metadata-row">
+                <span class="meta-item">
+                  <span class="meta-icon">📍</span>
+                  {{ item.job.location }}
+                </span>
+                <span class="meta-item mode-tag" [attr.data-mode]="item.job.workMode">
+                  {{ item.job.workMode }}
+                </span>
+                <span class="meta-item">
+                  <span class="meta-icon">🎓</span>
+                  Min GPA: <strong>{{ item.job.minimumGpa }}</strong>
+                </span>
+                <span class="meta-item visa-pill" [class.visa-yes]="item.job.sponsorshipAvailable">
+                  🛡️ {{ item.job.sponsorshipAvailable ? 'Sponsorship Offered' : 'No Sponsorship' }}
+                </span>
+              </div>
+            </div>
+
+            <!-- Required Skills pills list -->
+            <div class="job-skills-section">
+              <span class="skills-label">Required Skills:</span>
+              <div class="required-skills-pills">
+                <span 
+                  class="skill-pill" 
+                  *ngFor="let skill of item.job.requiredSkills"
+                  [class.skill-matched]="activeStudent && skillsList.includes(skill)"
+                >
+                  {{ skill }}
+                </span>
+              </div>
+            </div>
+
+            <!-- Card Actions footer -->
+            <div class="job-footer" *ngIf="activeStudent">
+              <hr class="card-divider" />
+              
+              <div class="action-row">
+                <!-- Apply Tracker button -->
+                <button 
+                  type="button" 
+                  class="btn-apply-toggle" 
+                  [class.applied]="appliedJobs[item.job.id]"
+                  (click)="toggleApply(item.job.id)"
+                >
+                  <span class="apply-icon">{{ appliedJobs[item.job.id] ? '✓' : '📝' }}</span>
+                  <span>{{ appliedJobs[item.job.id] ? 'Applied' : 'Mark as Applied' }}</span>
+                </button>
+
+                <!-- Status Selector dropdown if applied -->
+                <div class="status-tracker-dropdown" *ngIf="appliedJobs[item.job.id]">
+                  <label for="statusSelect-{{ item.job.id }}">Status:</label>
+                  <select 
+                    id="statusSelect-{{ item.job.id }}"
+                    [ngModel]="appliedJobs[item.job.id]"
+                    (ngModelChange)="updateApplicationStatus(item.job.id, $event)"
+                    class="status-select-control"
+                  >
+                    <option value="Applied">Applied</option>
+                    <option value="Interviewing">Interviewing</option>
+                    <option value="Offer">Offer</option>
+                    <option value="Rejected">Rejected</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+
+      <!-- No matches or jobs found fallback -->
+      <div class="empty-state card animate-fade" *ngIf="filteredListings.length === 0">
+        <span class="empty-icon">🔍</span>
+        <h3>No Listings Found</h3>
+        <p>No jobs match your current search location, work mode, or sponsorship filters. Try broadening your criteria.</p>
+      </div>
+
+    </section>
+
+  </main>
+</div>
